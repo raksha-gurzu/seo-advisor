@@ -1,0 +1,28 @@
+digraph G {
+  graph [rankdir=TB fontname="Arial" nodesep=0.5 ranksep=0.36 splines=spline bgcolor="transparent"
+         pad=0.15 newrank=true compound=true];
+  node  [fontname="Arial" fontsize=12 margin="0.14,0.07"];
+  edge  [fontname="Arial" fontsize=11 color="#5a6675" penwidth=1.4 arrowsize=0.75];
+  P0 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Phase 0: set up the repo</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">tools, CI, hooks, Claude Code,<BR/>ADRs, data model, AI base</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
+  P1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Phase 1: inventory and audit</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">test site MyPipit: onboarding, crawler,<BR/>rule engine, schedules, findings view</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  G1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>SEO team agrees</B><BR/><B>findings are</B><BR/><B>correct?</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fde7e7" color="#b42318" margin="0.04" penwidth=1.7];
+  P2 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Phase 2: content workflow</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">content items, versions, states,<BR/>reviews, keyword map</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  P3 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Phase 3: AI drafts + extension</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">drafts with checks, extension<BR/>for the test site editor</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  G3 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Pilot targets</B><BR/><B>met?</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fde7e7" color="#b42318" margin="0.04" penwidth=1.7];
+  P4 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Phase 4: second site and languages</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">test site extendmy.life: EN + DE,<BR/>hreflang, native review, health rule</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  P5 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Phase 5: measure and report</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">outcomes, reports, alerts</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  P6 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Later</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">deployment with DevOps,<BR/>more sites, paid data,<BR/>product features</FONT></TD></TR></TABLE>> shape="box" style="filled,dashed" fillcolor="#f2f5f9" color="#7a8899" penwidth=1.7];
+  FX [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Fix rules and prompts</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  P0 -> P1 [];
+  P1 -> G1 [];
+  G1 -> P2 [label=<<B> Yes </B>> fontcolor="#2e7d4f"];
+  G1 -> FX [label=<<B> No </B>> fontcolor="#b42318"];
+  FX -> P1 [];
+  P2 -> P3 [];
+  P3 -> G3 [];
+  G3 -> P4 [label=<<B> Yes </B>> fontcolor="#2e7d4f"];
+  G3 -> FX [label=<<B> No </B>> fontcolor="#b42318"];
+  P4 -> P5 [];
+  P5 -> P6 [style="dashed"];
+  { rank=same; G1; FX; }
+}

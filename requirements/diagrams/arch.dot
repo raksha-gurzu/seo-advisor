@@ -1,0 +1,58 @@
+digraph G {
+  graph [rankdir=TB fontname="Arial" nodesep=0.3 ranksep=0.45 splines=spline bgcolor="transparent"
+         pad=0.15 newrank=true compound=true];
+  node  [fontname="Arial" fontsize=12 margin="0.14,0.07"];
+  edge  [fontname="Arial" fontsize=11 color="#5a6675" penwidth=1.4 arrowsize=0.75];
+  subgraph cluster_people {
+    label=<<B>People</B>> fontsize=11 fontcolor="#3b4654" labeljust=l
+    style="rounded,dashed" color="#c9a96b" bgcolor="#fffaf0" margin=10
+  U1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Gurzu SEO team</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">audits, edits, first review</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  U2 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Client team</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">MyPipit, extendmy.life:<BR/>final approval, publishes</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  U3 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Expert reviewer (health)</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">rule to decide before<BR/>extendmy.life drafts</FONT></TD></TR></TABLE>> shape="box" style="filled,dashed" fillcolor="#f2f5f9" color="#7a8899" penwidth=1.7];
+  }
+  subgraph cluster_clients {
+    label=<<B>Interfaces</B>> fontsize=11 fontcolor="#3b4654" labeljust=l
+    style="rounded,dashed" color="#9fb3c8" bgcolor="#f7f9fb" margin=10
+  WEB [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Web dashboard</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">React + TypeScript:<BR/>sites, findings, content queue,<BR/>reviews, reports</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  EXT [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Chrome extension</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">shows suggestions in each<BR/>site&#x27;s editor, fills fields<BR/>when a person accepts</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e6f6f4" color="#0f766e" penwidth=1.7];
+  }
+  subgraph cluster_core {
+    label=<<B>seo-advisor service (Python, FastAPI)</B>> fontsize=11 fontcolor="#3b4654" labeljust=l
+    style="rounded,dashed" color="#6941c6" bgcolor="#faf8ff" margin=10
+  API [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>API</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">auth, roles, tenants, sites,<BR/>content, reviews, reports</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  WF [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Workflows (DBOS)</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">durable steps, per-site cron,<BR/>retries, queues per host</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  CR [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Crawler</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">sitemap + httpx,<BR/>robots.txt, rate limits</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  AU [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Audit engine</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">rule sets per page type<BR/>and language</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  KW [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Keyword service</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">Search Console queries,<BR/>autocomplete, page map</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  DR [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Draft service</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">AI drafts EN and DE<BR/>with [ADD: ...]</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  CK [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Checks</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">facts, copy, language,<BR/>health (YMYL) rules</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#fde7e7" color="#b42318" penwidth=1.7];
+  RP [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Reports and alerts</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">weekly report, alerts,<BR/>Emitii tasks</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+    API -> CR [style=invis]; WF -> AU [style=invis]; RP -> KW [style=invis];
+    CR -> DR [style=invis]; AU -> CK [style=invis];
+  }
+  DB [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>PostgreSQL 18 + pgvector</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">inventory, versions, findings,<BR/>workflow events, Search Console<BR/>rows, traces, job state</FONT></TD></TR></TABLE>> shape="cylinder" style="filled" fillcolor="#efe7fb" color="#6941c6" penwidth=1.7];
+  subgraph cluster_data {
+    label=<<B>Data sources (read-only)</B>> fontsize=11 fontcolor="#3b4654" labeljust=l
+    style="rounded,dashed" color="#0b5cad" bgcolor="#f4f8fe" margin=10
+  S1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Client public pages</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">MyPipit, extendmy.life</FONT></TD></TR></TABLE>> shape="note" style="filled" fillcolor="#ffffff" color="#475467" penwidth=1.7];
+  S2 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Search Console API</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">clicks, queries, positions,<BR/>index status</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
+  S3 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>CrUX API</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">Core Web Vitals<BR/>for real visitors</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
+  S4 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Bing Webmaster API</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">Bing data (German<BR/>desktop share)</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
+  S5 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>AI models</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">writer + checker from<BR/>another model family</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
+  }
+  U1 -> WEB [];
+  U2 -> WEB [];
+  U2 -> EXT [];
+  U3 -> WEB [style="dashed"];
+  WEB -> API [lhead="cluster_core"];
+  EXT -> API [lhead="cluster_core"];
+  CK -> DB [ltail="cluster_core"];
+  DB -> S3 [lhead="cluster_data" style="invis"];
+  CR -> S1 [ltail="cluster_core" lhead="cluster_data" label="read only"];
+  { rank=same; U1; U2; U3; }
+  { rank=same; WEB; EXT; }
+  { rank=same; API; WF; RP; }
+  { rank=same; CR; AU; KW; }
+  { rank=same; DR; CK; }
+  { rank=same; S1; S2; S3; S4; S5; }
+}

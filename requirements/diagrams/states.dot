@@ -1,0 +1,33 @@
+digraph G {
+  graph [rankdir=TB fontname="Arial" nodesep=0.45 ranksep=0.42 splines=spline bgcolor="transparent"
+         pad=0.15 newrank=true compound=true];
+  node  [fontname="Arial" fontsize=12 margin="0.14,0.07"];
+  edge  [fontname="Arial" fontsize=11 color="#5a6675" penwidth=1.4 arrowsize=0.75];
+  S1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Suggested</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">created by the engine</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#ffffff" color="#344054" penwidth=1.7];
+  S2 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Draft</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">a person edits</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#ffffff" color="#344054" penwidth=1.7];
+  S3 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>In review (2i)</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">Gurzu, second person</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#ffffff" color="#344054" penwidth=1.7];
+  S4 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Expert review</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">YMYL or German only</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#ffffff" color="#344054" penwidth=1.7];
+  S5 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Client review</B></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#ffffff" color="#344054" penwidth=1.7];
+  S6 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Approved</B></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#ffffff" color="#344054" penwidth=1.7];
+  S7 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Applied</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">a person saved it<BR/>in the site editor</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#ffffff" color="#344054" penwidth=1.7];
+  S8 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Live (verified)</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">crawl confirms the change</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
+  S9 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Needs review</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">audit finding or<BR/>review date reached</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#ffffff" color="#344054" penwidth=1.7];
+  SX [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Rejected</B></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#fde7e7" color="#b42318" penwidth=1.7];
+  SA [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Archived</B></TD></TR></TABLE>> shape="box" style="filled,dashed" fillcolor="#f2f5f9" color="#7a8899" penwidth=1.7];
+  S1 -> S2 [label=<<B> accept </B>> fontcolor="#3b4654"];
+  S1 -> SX [label=<<B> dismiss </B>> fontcolor="#3b4654"];
+  S2 -> S3 [label=<<B> submit </B>> fontcolor="#3b4654"];
+  S3 -> S4 [label=<<B> YMYL/DE </B>> fontcolor="#3b4654"];
+  S3 -> S5 [label=<<B> other </B>> fontcolor="#3b4654"];
+  S4 -> S5 [];
+  S5 -> S6 [label=<<B> approve </B>> fontcolor="#3b4654"];
+  S6 -> S7 [label=<<B> apply </B>> fontcolor="#3b4654"];
+  S7 -> S8 [label=<<B> crawl ok </B>> fontcolor="#3b4654"];
+  S3 -> S2 [style="dashed" label=<<B> changes </B>> fontcolor="#3b4654"];
+  S5 -> S2 [style="dashed" label=<<B> changes </B>> fontcolor="#3b4654"];
+  S8 -> S9 [style="dashed" label=<<B> later </B>> fontcolor="#3b4654"];
+  S9 -> S2 [style="dashed" label=<<B> edit </B>> fontcolor="#3b4654"];
+  S8 -> SA [style="dashed"];
+  { rank=same; S1; SX; }
+  { rank=same; S4; S5; }
+}

@@ -1,0 +1,20 @@
+digraph G {
+  graph [rankdir=TB fontname="Arial" nodesep=0.4 ranksep=0.4 splines=spline bgcolor="transparent"
+         pad=0.15 newrank=true compound=true];
+  node  [fontname="Arial" fontsize=12 margin="0.14,0.07"];
+  edge  [fontname="Arial" fontsize=11 color="#5a6675" penwidth=1.4 arrowsize=0.75];
+  graph [layout=circo mindist=0.6];
+  Q [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Choose one small part</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">the next useful step,<BR/>not a whole phase</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  R1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>1. Research</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">read the cited source,<BR/>ask Claude to explain,<BR/>write the question</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
+  E1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>2. Experiment</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">throwaway spike<BR/>in experiments/</FONT></TD></TR></TABLE>> shape="box" style="filled,dashed" fillcolor="#f2f5f9" color="#7a8899" penwidth=1.7];
+  I1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>3. Implement</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">small PR with tests,<BR/>only what the spike proved</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  U1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>4. Understand</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">Claude walks through the code,<BR/>short note in docs/notes/</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  UP [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>5. Review the plan</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">strategy changed? Update plan.md,<BR/>this PDF and an ADR</FONT></TD></TR></TABLE>> shape="note" style="filled" fillcolor="#ffffff" color="#475467" penwidth=1.7];
+  Q -> R1 [];
+  R1 -> E1 [];
+  E1 -> I1 [label=<<B> works </B>> fontcolor="#3b4654"];
+  I1 -> U1 [];
+  U1 -> UP [];
+  UP -> Q [];
+  E1 -> R1 [style="dashed" color="#b42318" label=<<B> does not work </B>> fontcolor="#3b4654"];
+}

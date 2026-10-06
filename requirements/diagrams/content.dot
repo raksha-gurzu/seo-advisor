@@ -1,0 +1,39 @@
+digraph G {
+  graph [rankdir=TB fontname="Arial" nodesep=0.45 ranksep=0.34 splines=spline bgcolor="transparent"
+         pad=0.15 newrank=true compound=true];
+  node  [fontname="Arial" fontsize=12 margin="0.14,0.07"];
+  edge  [fontname="Arial" fontsize=11 color="#5a6675" penwidth=1.4 arrowsize=0.75];
+  F [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Work item</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">from an audit finding or<BR/>from the SEO team</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
+  T [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Template or</B><BR/><B>one page?</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fff3d6" color="#c77700" margin="0.04" penwidth=1.7];
+  TF [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Template fix request</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">to the site&#x27;s developers<BR/>(fixes all pages of a type)</FONT></TD></TR></TABLE>> shape="note" style="filled" fillcolor="#ffffff" color="#475467" penwidth=1.7];
+  K [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Choose keywords</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">keyword map: one primary<BR/>keyword per page and language</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  DR [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>AI draft</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">EN and DE. Facts only from<BR/>the page, others [ADD: ...]</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  CK [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Checks</B><BR/><B>pass?</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fde7e7" color="#b42318" margin="0.04" penwidth=1.7];
+  RW [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Rewrite once</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">or mark the sentence</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  R1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Gurzu review (2i)</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">second person, not the author:<BR/>accuracy, tone, keywords</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  Y [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Health (YMYL)</B><BR/><B>or German?</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fff3d6" color="#c77700" margin="0.04" penwidth=1.7];
+  R2 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Expert or native review</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">medical expert (rule to decide),<BR/>native German speaker</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  R3 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Client approval</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">final approval</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  AP [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Apply in the site editor</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">extension fills the fields;<BR/>a person clicks Save</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e6f6f4" color="#0f766e" penwidth=1.7];
+  V [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Verify on the live site</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">next crawl compares the<BR/>published page with the draft</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  M [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Measure</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">Search Console after<BR/>4, 8 and 12 weeks</FONT></TD></TR></TABLE>> shape="cylinder" style="filled" fillcolor="#efe7fb" color="#6941c6" penwidth=1.7];
+  F -> T [];
+  T -> TF [label=<<B> template </B>> fontcolor="#3b4654"];
+  T -> K [label=<<B> page </B>> fontcolor="#3b4654"];
+  K -> DR [];
+  DR -> CK [];
+  CK -> RW [label=<<B> No </B>> fontcolor="#b42318"];
+  RW -> CK [];
+  CK -> R1 [label=<<B> Yes </B>> fontcolor="#2e7d4f"];
+  R1 -> Y [];
+  Y -> R2 [label=<<B> Yes </B>> fontcolor="#2e7d4f"];
+  Y -> R3 [label=<<B> No </B>> fontcolor="#b42318"];
+  R2 -> R3 [];
+  R3 -> AP [];
+  AP -> V [];
+  V -> M [];
+  R1 -> DR [style="dashed" constraint="false" label=<<B> changes </B>> fontcolor="#3b4654"];
+  { rank=same; T; TF; }
+  { rank=same; CK; RW; }
+  { rank=same; Y; R2; }
+}

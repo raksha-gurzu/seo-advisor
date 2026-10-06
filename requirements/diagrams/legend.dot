@@ -1,0 +1,19 @@
+digraph G {
+  graph [rankdir=TB fontname="Arial" nodesep=0.22 ranksep=0.25 splines=spline bgcolor="transparent"
+         pad=0.15 newrank=true compound=true];
+  node  [fontname="Arial" fontsize=12 margin="0.14,0.07"];
+  edge  [fontname="Arial" fontsize=11 color="#5a6675" penwidth=1.4 arrowsize=0.75];
+  l1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Start or end</B></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
+  l2 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Platform step</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  l3 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>A person acts</B></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  l4 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Decision</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fff3d6" color="#c77700" margin="0.04" penwidth=1.7];
+  l5 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Data source</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
+  l6 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Extension</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e6f6f4" color="#0f766e" penwidth=1.7];
+  l7 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Check or stop</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#fde7e7" color="#b42318" penwidth=1.7];
+  l8 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Database</B></TD></TR></TABLE>> shape="cylinder" style="filled" fillcolor="#efe7fb" color="#6941c6" penwidth=1.7];
+  l9 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Web page or file</B></TD></TR></TABLE>> shape="note" style="filled" fillcolor="#ffffff" color="#475467" penwidth=1.7];
+  l10 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Later or optional</B></TD></TR></TABLE>> shape="box" style="filled,dashed" fillcolor="#f2f5f9" color="#7a8899" penwidth=1.7];
+  { rank=same; l1; l2; l3; l4; l5; }
+  { rank=same; l6; l7; l8; l9; l10; }
+  l1 -> l6 [style=invis];
+}

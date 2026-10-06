@@ -1,0 +1,25 @@
+digraph G {
+  graph [rankdir=TB fontname="Arial" nodesep=0.5 ranksep=0.36 splines=spline bgcolor="transparent"
+         pad=0.15 newrank=true compound=true];
+  node  [fontname="Arial" fontsize=12 margin="0.14,0.07"];
+  edge  [fontname="Arial" fontsize=11 color="#5a6675" penwidth=1.4 arrowsize=0.75];
+  S [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Add a site</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">base URL, languages,<BR/>YMYL yes or no</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
+  A [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Connect Search Console</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">read-only access to the<BR/>property (domain property)</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
+  B [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Read robots.txt and sitemaps</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">sitemap index, one sitemap<BR/>per type and language</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  C [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Build the page inventory</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">one row per URL and language,<BR/>hreflang groups EN-DE</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  D [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Classify page types</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">listing, article, category,<BR/>static. Rules come per type</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  E [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Baseline crawl and audit</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">all pages, all rules</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  F [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Baseline Search Console</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">16 months of page and query data</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  G [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>SEO team checks the baseline</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">removes false findings,<BR/>sets priorities</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  H [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Site is live in the platform</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">schedules start</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
+  S -> A [];
+  A -> B [];
+  B -> C [];
+  C -> D [];
+  D -> E [];
+  D -> F [];
+  E -> G [];
+  F -> G [];
+  G -> H [];
+  { rank=same; E; F; }
+}

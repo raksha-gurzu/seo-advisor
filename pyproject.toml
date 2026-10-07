@@ -1,0 +1,109 @@
+[project]
+name = "seo-advisor"
+version = "0.1.0"
+description = "Multi-site SEO platform: page inventory, scheduled audits, reviewed drafts, measured results."
+readme = "README.md"
+license = "LicenseRef-Proprietary"
+requires-python = ">=3.14,<3.15"
+dependencies = [
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+]
+
+[dependency-groups]
+dev = [
+  { include-group = "test" },
+  { include-group = "lint" },
+]
+test = [
+    "pytest>=9.1.1",
+]
+lint = [
+    "import-linter>=2.15",
+    "mypy>=2.3.1",
+    "pip-audit>=2.10.1",
+    "ruff>=0.16.9",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13"]
+build-backend = "uv_build"
+
+[tool.uv]
+required-version = ">=0.12.23,<0.13"
+exclude-newer = "7 days"
+default-groups = ["dev"]
+
+[tool.uv.build-backend]
+module-name = "seo_advisor"
+module-root = "apps/api/src"
+
+[tool.ruff]
+target-version = "py314"
+src = ["apps/api/src", "apps/api/tests"]
+# requirements/ holds the PDF build scripts (document tools, not product code).
+# experiments/ holds throwaway spikes that production code never imports.
+extend-exclude = ["requirements", "experiments"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "S", "ASYNC", "PT", "RUF", "DTZ", "N"]
+
+[tool.ruff.lint.per-file-ignores]
+# pytest uses plain assert statements. S101 is for production code only.
+"apps/api/tests/**" = ["S101"]
+
+[tool.mypy]
+strict = true
+python_version = "3.14"
+files = ["apps/api/src", "apps/api/tests"]
+mypy_path = "apps/api/src"
+explicit_package_bases = true
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pytest]
+minversion = "9.0"
+strict = true
+testpaths = ["apps/api/tests"]
+addopts = ["--import-mode=importlib"]
+markers = [
+  "unit: fast test with no database and no network",
+  "integration: uses the real PostgreSQL (testcontainers)",
+  "e2e: runs the full app",
+  "live: calls a real outside service; never runs in CI",
+]
+
+[tool.importlinter]
+root_package = "seo_advisor"
+
+[[tool.importlinter.contracts]]
+name = "core and integrations never import a feature"
+type = "forbidden"
+source_modules = ["seo_advisor.core", "seo_advisor.integrations"]
+forbidden_modules = ["seo_advisor.features"]
+
+# Add these two contracts for each new feature. Replace <name> with the feature
+# folder name. Other features can then import only <name>.service.
+# The second contract needs seo_advisor.main (step 0.5). Before main.py exists,
+# lint-imports stops with "seo_advisor.main not present in the graph".
+#
+# [[tool.importlinter.contracts]]
+# name = "<name>: internals are private"
+# type = "protected"
+# protected_modules = [
+#   "seo_advisor.features.<name>.models",
+#   "seo_advisor.features.<name>.repository",
+#   "seo_advisor.features.<name>.schemas",
+#   "seo_advisor.features.<name>.workflows",
+# ]
+# allowed_importers = ["seo_advisor.features.<name>"]
+#
+# [[tool.importlinter.contracts]]
+# name = "<name>: only main.py mounts the router"
+# type = "protected"
+# protected_modules = ["seo_advisor.features.<name>.api"]
+# allowed_importers = ["seo_advisor.features.<name>", "seo_advisor.main"]

@@ -40,6 +40,8 @@ mise run docs:pdf     # rebuild requirements/seo-advisor-requirements.pdf
 
 ## Structure: modular monolith, grouped by feature
 
+Target layout. Make a folder when its first file is written; never add empty placeholders.
+
 ```text
 apps/api/src/seo_advisor/
   core/            config, db session, ids, tenancy, logging, errors

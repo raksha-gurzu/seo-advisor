@@ -43,6 +43,8 @@ Do these steps:
 
 ## Repository layout
 
+This is the target layout. A folder is made when its first file is written.
+
 | Folder | Contents |
 |---|---|
 | `apps/api` | Python API (FastAPI). Code is grouped by feature. |

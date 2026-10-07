@@ -8,6 +8,8 @@ What to build and in which order. How to work: `CLAUDE.md` (repo root).
 - Work on the current step only, in small parts. Tick a task only when its "Done when" is true.
 - Plan changes: strike the old task (`~~task~~ — why`), add a change-log line, update the PDF and the ADR.
 
+**Current step:** Phase 1, slice 1 (safe fetcher + sitemap reader).
+
 ## Session habits (for you)
 
 - One task per Claude session. `/clear` before the next task; `/compact <focus>` to continue a long task.
@@ -44,11 +46,25 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 
 ## Phase 0: Set up the repo (about 1 to 1.5 weeks)
 
+> **Changed 7 Oct 2026: feature-first.** ~~Do steps 0.4 to 0.12 before Phase 1.~~ — The owner wants a real feature first, and each setup part when a slice needs it. Steps 0.1 to 0.3 are done. Steps 0.4 to 0.12 keep their tasks and "Done when"; this table says when each one starts.
+>
+> | Step | Starts with |
+> |---|---|
+> | 0.4 Database | Slice 2. Only the tables that the slice needs (`tenants`, `sites`, `pages`). |
+> | 0.5 API | Slice 3 |
+> | 0.6 Web app | Slice 5. The extension starts in Phase 3. |
+> | 0.7 Hooks, 0.8 CI | Before the first pull request into `dev`, or when the owner decides |
+> | 0.9 Claude Code settings | When the owner decides. Recommended soon: deny reads of `.env`. |
+> | 0.10 ADRs | Write each ADR when its decision is made or first used. |
+> | 0.11 SSRF guard | Slice 1 (the first outbound fetch) |
+> | 0.11 AI layer, evals | Phase 3 (AI drafts) |
+> | 0.12 Final check | Before a second person joins |
+
 **0.1 Machine**
 - [x] Install mise, Docker, gh CLI, Claude Code. Git identity `raksha-gurzu`; push via `github.com-gurzu`. Done when: all four report versions and `gh auth status` passes.
 
 **0.2 Skeleton** (R4 §4, §9.5, §18)
-- [x] Folders as in `CLAUDE.md` → Structure, plus `packages/api-client`, `docs/{decisions,architecture,design,notes}`, `evals`, `experiments`, `infra`, `.github`, and this `requirements/` folder. `PLAN.md` and `CLAUDE.md` stay at the repo root, not in `requirements/`. Done when: the tree matches.
+- [x] Folders as in `CLAUDE.md` → Structure, plus `packages/api-client`, `docs/{decisions,architecture,design,notes}`, `evals`, `experiments`, `infra`, `.github`, and this `requirements/` folder. `PLAN.md` and `CLAUDE.md` stay at the repo root, not in `requirements/`. Done when: the tree matches. Changed 7 Oct: empty placeholder folders removed; each folder is made with its first file.
 - [x] README (5-minute setup), `.gitignore`, `.gitattributes`, `.editorconfig`, `.env.example` (fake values), NOTICE (proprietary), CONTRIBUTING.md, SECURITY.md; a short README in folders that have rules (`docs`, `experiments`, `packages/api-client`). Done when: a new person can follow the README.
 - [x] `mise.toml`: tool pins + tasks `setup dev test lint typecheck check audit db:up db:down db:migrate db:seed gen-client evals docs:pdf` (`docs:pdf` rebuilds the requirements PDF; needs Node + `@hpcc-js/wasm-graphviz` and Chromium). Done when: `mise run setup` works on a fresh clone.
 
@@ -98,6 +114,14 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 ---
 
 ## Phase 1: Inventory and audit (test site MyPipit, 2 to 3 weeks)
+
+**Slices (order of work).** Each slice is one small pull request that works from end to end. The tasks after the slices describe the full phase.
+- [ ] Slice 1: spike, then `inventory`: safe fetcher (SSRF guard, robots.txt with Protego, rate limit per host; reuse from SEOAdvisor), sitemap and sitemap-index reader, page type and language for each URL. Live fetch: only `robots.txt` and the sitemaps of MyPipit, read-only, a few requests; save them as test fixtures. Done when: the MyPipit URL list = its sitemap URLs, and the tests use only the fixtures.
+- [ ] Slice 2: save sites and pages (step 0.4: Compose, SQLAlchemy, Alembic; tables `tenants`, `sites`, `pages`). Done when: a second run changes no rows, and an integration test passes twice.
+- [ ] Slice 3: `GET /api/v1/sites/{id}/pages` (step 0.5). Done when: the endpoint returns the stored MyPipit pages.
+- [ ] Slice 4: crawl, snapshots, first rules, findings with evidence, DBOS schedule. Done when: each finding has evidence.
+- [ ] Slice 5: findings screen (step 0.6). Done when: the SEO team reviews findings there.
+
 - [ ] `sites`, `inventory`: onboarding, robots.txt, sitemap index, page types. Done when: inventory = sitemap URLs.
 - [ ] `inventory`: crawler (robots, rate limit per host, snapshots). Done when: a full crawl is stored.
 - [ ] `audits`: rule engine; rules per page type and language, each with a source (PDF §12). Done when: each finding has evidence.
@@ -146,3 +170,4 @@ Deployment (DevOps) · competitor analysis · paid keyword data · RLS + outside
 | 2026-10-07 | Add `.gitattributes` (LF endings, generated files) and folder READMEs to step 0.2 | Senior review of the repo layout |
 | 2026-10-07 | CONTRIBUTING.md and SECURITY.md moved from Should to step 0.2; `db:down` task added; each mise task names the step that makes its input | Owner decision |
 | 2026-10-07 | Step 0.3: `protected` contracts are added per feature (template in `pyproject.toml`); pip-audit checks `uv.lock`; pnpm checks join `check` in step 0.6; the 7-day delay gives ruff 0.16.9 and mypy 2.3.1 | One wildcard contract cannot limit a feature to its own internals; owner decision |
+| 2026-10-07 | Feature-first: Phase 1 in 5 slices; steps 0.4 to 0.12 start when a slice needs them; empty placeholder folders removed | Owner decision: see a real feature first and understand why each part exists |

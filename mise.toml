@@ -89,6 +89,12 @@ description = "Add the 2 fake seed sites (step 0.4)"
 depends = ["db:migrate"]
 run = "uv run python -m seo_advisor.seed"
 
+# --- Features ----------------------------------------------------------------
+
+[tasks."inventory:discover"]
+description = "Print a site's pages from its sitemaps (read-only, live)"
+run = "uv run python -m seo_advisor.features.inventory.cli"
+
 # --- API client and evals ----------------------------------------------------
 
 [tasks.gen-client]

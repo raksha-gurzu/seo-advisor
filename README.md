@@ -34,6 +34,7 @@ Do these steps:
 | `mise run check` | Runs lint, type checks and tests. Shows only failures. | Step 0.3 |
 | `mise run test -- apps/api/tests/<feature>` | Runs the tests for one feature. | Step 0.3 |
 | `mise run audit` | Checks dependencies for known vulnerabilities. | Step 0.3 |
+| `mise run inventory:discover -- infra/sites/mypipit.toml` | Reads the site's robots.txt and sitemaps (read-only) and prints its pages by type. Add `--list` for every page. | Now |
 | `mise run db:up` / `db:down` | Starts or stops PostgreSQL. The data stays in a volume. | Step 0.4 |
 | `mise run db:migrate` | Applies database migrations. | Step 0.4 |
 | `mise run db:seed` | Adds 2 fake sites. | Step 0.4 |

@@ -8,7 +8,7 @@ What to build and in which order. How to work: `CLAUDE.md` (repo root).
 - Work on the current step only, in small parts. Tick a task only when its "Done when" is true.
 - Plan changes: strike the old task (`~~task~~ — why`), add a change-log line, update the PDF and the ADR.
 
-**Current step:** Phase 1, slice 1 (safe fetcher + sitemap reader).
+**Current step:** Phase 1, slice 1 stages 3-4 (owner walk-through, plan review); then slice 2 (save sites and pages).
 
 ## Session habits (for you)
 
@@ -116,7 +116,7 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 ## Phase 1: Inventory and audit (test site MyPipit, 2 to 3 weeks)
 
 **Slices (order of work).** Each slice is one small pull request that works from end to end. The tasks after the slices describe the full phase.
-- [ ] Slice 1: spike, then `inventory`: safe fetcher (SSRF guard, robots.txt with Protego, rate limit per host; reuse from SEOAdvisor), sitemap and sitemap-index reader, page type and language for each URL. Live fetch: only `robots.txt` and the sitemaps of MyPipit, read-only, a few requests; save them as test fixtures. Done when: the MyPipit URL list = its sitemap URLs, and the tests use only the fixtures.
+- [x] Slice 1: spike, then `inventory`: safe fetcher (SSRF guard, robots.txt with Protego, rate limit per host; reuse from SEOAdvisor), sitemap and sitemap-index reader, page type and language for each URL. Live fetch: only `robots.txt` and the sitemaps of MyPipit, read-only, a few requests; save them as test fixtures. Done when: the MyPipit URL list = its sitemap URLs, and the tests use only the fixtures.
 - [ ] Slice 2: save sites and pages (step 0.4: Compose, SQLAlchemy, Alembic; tables `tenants`, `sites`, `pages`). Done when: a second run changes no rows, and an integration test passes twice.
 - [ ] Slice 3: `GET /api/v1/sites/{id}/pages` (step 0.5). Done when: the endpoint returns the stored MyPipit pages.
 - [ ] Slice 4: crawl, snapshots, first rules, findings with evidence, DBOS schedule. Done when: each finding has evidence.

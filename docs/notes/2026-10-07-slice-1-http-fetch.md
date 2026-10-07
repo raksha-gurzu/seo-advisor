@@ -71,6 +71,42 @@ After the fixes: `mise run check` passes (92 tests). Live: the MyPipit sitemap l
 - httpx releases are slow (0.28.1, Dec 2024), and the guard uses a private httpcore hook. `test_public_client_installs_the_guard_and_the_pinned_backend` fails if an update breaks it.
 - The `security-reviewer` subagent does not exist yet (step 0.9). This review used a general agent with a security prompt.
 
-## Next
+## Next (written after part 2a)
 
 Part 2b: `features/inventory/` (sitemap reader with `recover=False`, page types from site data, `discover_pages` service, a command that prints the MyPipit page list), the fetch settings in `Settings`, and the inventory import contract.
+
+
+# Slice 1, part 2b: inventory (7 Oct 2026)
+
+Part 2b is complete, so slice 1 is complete: `mise run inventory:discover -- infra/sites/mypipit.toml` prints the MyPipit pages by type.
+
+## Files
+
+| File | Contents |
+|---|---|
+| `core/config.py` | 5 required settings: `FETCH_USER_AGENT`, `FETCH_ROBOTS_AGENT`, `FETCH_TIMEOUT_S`, `FETCH_DEADLINE_S`, `FETCH_MIN_DELAY_S` (times must be above 0). `.env.example` has them; the 5 keys were added to the local `.env` from `.env.example`. |
+| `infra/sites/mypipit.toml` | MyPipit site data: origin, language `en`, 7 page type patterns (owner approved). Slice 2 loads it into the database. |
+| `features/inventory/schemas.py` | `PageTypeRule` (pattern checks), `SiteSpec` (base_url must be an origin), `SitemapEntry`, `ParsedSitemap`, `DiscoveredPage`, `InventoryProblem`, `Inventory`. |
+| `features/inventory/sitemaps.py` | `parse_sitemap`: lxml, no entities/DTD/network, `recover=False`, gzip limit, 50 MB limit (sitemaps.org). From SEOAdvisor, with `recover=False`. |
+| `features/inventory/page_types.py` | `page_type_of`: first matching pattern; `*` = one whole path part; else `other`. |
+| `features/inventory/service.py` | `load_site_spec`, `discover_pages`: robots.txt `Sitemap:` lines else `/sitemap.xml`; index then children; problems as data. |
+| `features/inventory/cli.py` | The command. A settings problem prints the clear message, no traceback. |
+| `tests/conftest.py` | `config` and `dns` moved up from `tests/integrations/`, for all test folders. |
+| `tests/inventory/` | 40 tests, with the real MyPipit sitemap as a fixture. |
+
+## Decisions
+
+- Problems are data, not crashes: `sitemap_blocked`, `sitemap_unreadable`, `sitemap_invalid`, `nested_sitemap_index`, `url_on_other_host`, `duplicate_url`. The service catches only named error types.
+- sitemaps.org rules: a sitemap lists only URLs on its own host; an index must not list another index.
+- Import contract "inventory: internals are private": other features use only `inventory.service`. The router contract comes with `api.py` (slice 3).
+- mypy: lxml has no types. An override in `pyproject.toml` (with the reason) accepts it as `Any`, until the owner decides about `lxml-stubs`.
+
+## Checks
+
+1. Tests first: collection failed before the code; after the code, all pass. `mise run check`: 141 tests, mypy strict, 2 contracts kept. `mise run audit`: no known vulnerabilities.
+2. Contract test: a temporary feature that imports `inventory.schemas` breaks the contract; one that imports `inventory.service` keeps it. Removed after the test.
+3. Live (read-only, 2 requests): 1 sitemap, 58 pages: blog_post 30, listing 17, blog_category 5, static 3, listing_index 1, blog_index 1, seller 1. 0 problems.
+
+## Next
+
+Slice 1 stage 3: walk the owner through slice 1 (fetcher with the security fixes, inventory). Stage 4: review the plan. Then slice 2: save sites and pages (step 0.4).

@@ -7,6 +7,11 @@ VALID_ENV = {
     "APP_ENV": "test",
     "LOG_LEVEL": "info",
     "DATABASE_URL": "postgresql+psycopg://user:s3cret-pass@localhost:5432/db",
+    "FETCH_USER_AGENT": "seo-advisor-test/0.1",
+    "FETCH_ROBOTS_AGENT": "seo-advisor-test",
+    "FETCH_TIMEOUT_S": "20",
+    "FETCH_DEADLINE_S": "60",
+    "FETCH_MIN_DELAY_S": "1.0",
 }
 
 
@@ -71,3 +76,25 @@ def test_all_problems_are_listed_together(env: pytest.MonkeyPatch) -> None:
     message = str(error.value)
     assert "APP_ENV (missing)" in message
     assert "DATABASE_URL (missing)" in message
+
+
+@pytest.mark.unit
+def test_fetch_settings_are_loaded(env: pytest.MonkeyPatch) -> None:
+    settings = load_settings()
+
+    assert settings.fetch_user_agent == "seo-advisor-test/0.1"
+    assert settings.fetch_robots_agent == "seo-advisor-test"
+    assert settings.fetch_timeout_s == 20.0
+    assert settings.fetch_deadline_s == 60.0
+    assert settings.fetch_min_delay_s == 1.0
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "key", ["FETCH_TIMEOUT_S", "FETCH_DEADLINE_S", "FETCH_MIN_DELAY_S"]
+)
+def test_fetch_times_must_be_above_zero(env: pytest.MonkeyPatch, key: str) -> None:
+    env.setenv(key, "0")
+
+    with pytest.raises(SettingsError, match=f"{key} \\(invalid\\)"):
+        load_settings()

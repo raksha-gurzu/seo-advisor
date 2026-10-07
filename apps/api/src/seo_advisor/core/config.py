@@ -6,7 +6,7 @@ Every field is required: a missing or invalid value stops start-up.
 
 from typing import Literal
 
-from pydantic import SecretStr, ValidationError
+from pydantic import PositiveFloat, SecretStr, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +20,13 @@ class Settings(BaseSettings):
     app_env: Literal["local", "test", "ci", "production"]
     log_level: Literal["debug", "info", "warning", "error"]
     database_url: SecretStr
+
+    # Outbound fetch (integrations/http_fetch). Ask the owner before changing the delay.
+    fetch_user_agent: str
+    fetch_robots_agent: str
+    fetch_timeout_s: PositiveFloat
+    fetch_deadline_s: PositiveFloat
+    fetch_min_delay_s: PositiveFloat
 
 
 def load_settings() -> Settings:

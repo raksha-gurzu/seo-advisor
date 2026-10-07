@@ -16,10 +16,11 @@ _.file = ".env"
 # --- Setup -------------------------------------------------------------------
 
 [tasks.setup]
-description = "Install tools and create .env (steps 0.3, 0.4, 0.6 add deps and database)"
+description = "Install tools, Python deps and .env (steps 0.4, 0.6 add database and web)"
 run = [
   "mise install",
   "test -f .env || cp .env.example .env",
+  "uv sync --locked",
 ]
 
 # --- Run ---------------------------------------------------------------------
@@ -44,31 +45,29 @@ description = "Lint, type checks and tests"
 depends = ["lint", "typecheck", "test"]
 
 [tasks.lint]
-description = "Lint and format checks (steps 0.3, 0.6)"
+description = "Lint, format and import-rule checks"
+# Step 0.6 adds "pnpm -r lint" when the web app exists.
 run = [
   "uv run ruff check --quiet",
   "uv run ruff format --check --quiet",
   "uv run lint-imports",
-  "pnpm -r lint",
 ]
 
 [tasks.typecheck]
-description = "Type checks (steps 0.3, 0.6)"
-run = [
-  "uv run mypy",
-  "pnpm -r typecheck",
-]
+description = "Type checks (mypy --strict)"
+# Step 0.6 adds "pnpm -r typecheck" when the web app exists.
+run = "uv run mypy"
 
 [tasks.test]
-description = "Tests; add a path after -- for one feature (step 0.3)"
+description = "Tests; add a path after -- for one feature"
 run = "uv run pytest -q"
 
 [tasks.audit]
-description = "Check dependencies for known vulnerabilities (steps 0.3, 0.6)"
-run = [
-  "uv run pip-audit",
-  "pnpm audit",
-]
+description = "Check dependencies for known vulnerabilities"
+# Audits the exact pins and hashes in uv.lock. Our own package is not on PyPI,
+# so --no-emit-project leaves it out of the list.
+# Step 0.6 adds "pnpm audit" when the web app exists.
+run = "uv export --locked --quiet --no-emit-project --format requirements-txt | uv run pip-audit --strict --disable-pip --require-hashes -r /dev/stdin"
 
 # --- Database ----------------------------------------------------------------
 

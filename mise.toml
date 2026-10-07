@@ -1,0 +1,114 @@
+# Tool versions and project tasks. See PLAN.md, step 0.2.
+# Each task names the step that makes its input files. A task fails with a
+# clear error until that step is done.
+
+[tools]
+python = "3.14.8"
+uv = "0.12.23"
+node = "24.21.0"
+pnpm = "12.9.1"
+gitleaks = "8.30.1"
+prek = "0.5.5"
+
+[env]
+_.file = ".env"
+
+# --- Setup -------------------------------------------------------------------
+
+[tasks.setup]
+description = "Install tools and create .env (steps 0.3, 0.4, 0.6 add deps and database)"
+run = [
+  "mise install",
+  "test -f .env || cp .env.example .env",
+]
+
+# --- Run ---------------------------------------------------------------------
+
+[tasks.dev]
+description = "Start the API and the web app"
+depends = ["dev:api", "dev:web"]
+
+[tasks."dev:api"]
+description = "Start the API (step 0.5)"
+depends = ["db:up"]
+run = "uv run fastapi dev apps/api/src/seo_advisor/main.py"
+
+[tasks."dev:web"]
+description = "Start the web app (step 0.6)"
+run = "pnpm --filter web dev"
+
+# --- Quality -----------------------------------------------------------------
+
+[tasks.check]
+description = "Lint, type checks and tests"
+depends = ["lint", "typecheck", "test"]
+
+[tasks.lint]
+description = "Lint and format checks (steps 0.3, 0.6)"
+run = [
+  "uv run ruff check --quiet",
+  "uv run ruff format --check --quiet",
+  "uv run lint-imports",
+  "pnpm -r lint",
+]
+
+[tasks.typecheck]
+description = "Type checks (steps 0.3, 0.6)"
+run = [
+  "uv run mypy",
+  "pnpm -r typecheck",
+]
+
+[tasks.test]
+description = "Tests; add a path after -- for one feature (step 0.3)"
+run = "uv run pytest -q"
+
+[tasks.audit]
+description = "Check dependencies for known vulnerabilities (steps 0.3, 0.6)"
+run = [
+  "uv run pip-audit",
+  "pnpm audit",
+]
+
+# --- Database ----------------------------------------------------------------
+
+[tasks."db:up"]
+description = "Start PostgreSQL and wait until it is healthy (step 0.4)"
+run = "docker compose -f infra/docker-compose.yml up -d --wait"
+
+[tasks."db:down"]
+description = "Stop PostgreSQL; the data stays in its volume (step 0.4)"
+run = "docker compose -f infra/docker-compose.yml down"
+
+[tasks."db:migrate"]
+description = "Apply migrations (step 0.4)"
+depends = ["db:up"]
+run = "uv run alembic upgrade head"
+
+[tasks."db:seed"]
+description = "Add the 2 fake seed sites (step 0.4)"
+depends = ["db:migrate"]
+run = "uv run python -m seo_advisor.seed"
+
+# --- API client and evals ----------------------------------------------------
+
+[tasks.gen-client]
+description = "Export OpenAPI and make the TypeScript client again (step 0.5)"
+run = [
+  "uv run python -m seo_advisor.openapi packages/api-client/openapi.json",
+  "pnpm --filter api-client generate",
+]
+
+[tasks.evals]
+description = "LLM evals on recorded data (step 0.11)"
+run = "uv run python -m evals"
+
+# --- Documents ---------------------------------------------------------------
+
+[tasks."docs:pdf"]
+description = "Build the requirements PDF again (needs the diagram build deps)"
+dir = "requirements/diagrams"
+run = [
+  "python build_requirements_pdf.py .",
+  "python render.py requirements.html ../seo-advisor-requirements.pdf",
+]

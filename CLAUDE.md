@@ -54,7 +54,13 @@ apps/api/src/seo_advisor/
     reports/       outcomes, reports, alerts
   main.py          builds the app, mounts feature routers
 apps/api/tests/<feature>/          tests per feature
-apps/web/src/features/<feature>/   UI per feature; shared UI in src/shared/
+apps/web/src/
+  app/             router, query client, providers
+  routes/          TanStack Router routes; thin, they call features
+  features/        UI per feature (empty until its phase)
+  shared/ui/       shadcn/ui components
+  shared/lib/      helpers, API client setup
+  shared/hooks/    shared React hooks
 apps/extension/    thin client: no logic, no keys
 ```
 

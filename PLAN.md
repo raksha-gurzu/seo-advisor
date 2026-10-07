@@ -24,7 +24,8 @@ Each decision gets an ADR in `docs/decisions/` (step 0.10).
 | Product | Read-only on client sites. The extension fills the site editor; a person saves. Never publish. |
 | Reviews | Gurzu 2i review, then client approval. Expert review for health; native review for German. |
 | Structure | Modular monolith grouped by feature; features talk only through `service.py` (layout in `CLAUDE.md`). |
-| Stack | Python, uv, FastAPI, Pydantic, SQLAlchemy (sync), Alembic, DBOS · PostgreSQL + pgvector · React, TypeScript, Vite, pnpm · WXT · mise · Docker Compose. |
+| Stack | Python, uv, FastAPI, Pydantic, SQLAlchemy (sync), Alembic, DBOS · PostgreSQL + pgvector · React, TypeScript, Vite, pnpm, TanStack Router + Query + Table, Tailwind CSS + shadcn/ui · WXT · mise · Docker Compose. |
+| Frontend | React single-page app; no Next.js, no global store. TanStack Router, Query, Table; Tailwind CSS + shadcn/ui (code in the repo). React Hook Form + Zod from Phase 2; Recharts from Phase 5. |
 | Tenancy | Shared schema, `tenant_id` + `site_id` on every row; row-level security later. |
 | Git and CI | Protected `main`, squash merge, Conventional Commits PR titles, Dependabot, gitleaks. 0 approvals while one engineer; 1 when a second joins. |
 | Repo | Package `seo_advisor`. Reuse from SEOAdvisor: fetcher + SSRF guard, robots (Protego), title pixel check, AI wrapper. |
@@ -47,9 +48,9 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 - [x] Install mise, Docker, gh CLI, Claude Code. Git identity `raksha-gurzu`; push via `github.com-gurzu`. Done when: all four report versions and `gh auth status` passes.
 
 **0.2 Skeleton** (R4 §4, §9.5, §18)
-- [ ] Folders as in `CLAUDE.md` → Structure, plus `packages/api-client`, `docs/{decisions,architecture,design,notes}`, `evals`, `experiments`, `infra`, `.github`, and this `requirements/` folder. `PLAN.md` and `CLAUDE.md` stay at the repo root, not in `requirements/`. Done when: the tree matches.
-- [ ] README (5-minute setup), `.gitignore`, `.editorconfig`, `.env.example` (fake values), NOTICE (proprietary). Done when: a new person can follow the README.
-- [ ] `mise.toml`: tool pins + tasks `setup dev test lint typecheck check audit db:up db:migrate db:seed gen-client evals docs:pdf` (`docs:pdf` rebuilds the requirements PDF; needs Node + `@hpcc-js/wasm-graphviz` and Chromium). Done when: `mise run setup` works on a fresh clone.
+- [x] Folders as in `CLAUDE.md` → Structure, plus `packages/api-client`, `docs/{decisions,architecture,design,notes}`, `evals`, `experiments`, `infra`, `.github`, and this `requirements/` folder. `PLAN.md` and `CLAUDE.md` stay at the repo root, not in `requirements/`. Done when: the tree matches.
+- [x] README (5-minute setup), `.gitignore`, `.gitattributes`, `.editorconfig`, `.env.example` (fake values), NOTICE (proprietary), CONTRIBUTING.md, SECURITY.md; a short README in folders that have rules (`docs`, `experiments`, `packages/api-client`). Done when: a new person can follow the README.
+- [x] `mise.toml`: tool pins + tasks `setup dev test lint typecheck check audit db:up db:down db:migrate db:seed gen-client evals docs:pdf` (`docs:pdf` rebuilds the requirements PDF; needs Node + `@hpcc-js/wasm-graphviz` and Chromium). Done when: `mise run setup` works on a fresh clone.
 
 **0.3 Python** (R4 §1, §5.3, §11.4)
 - [ ] `pyproject.toml`, `uv.lock`, groups `dev test lint`, `exclude-newer = "7 days"`, src layout with `core/`, `integrations/`, empty `features/`. Done when: `uv sync --locked` passes.
@@ -66,7 +67,7 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 - [ ] `gen-client`: `openapi.json` → `packages/api-client`. Done when: the web app calls `/health` through it.
 
 **0.6 Web and extension** (R4 §2, §3)
-- [ ] Vite react-ts, strict TS flags (R4 §2.5), oxlint + Prettier, Vitest, TanStack Query, `src/features` + `src/shared`; keep pnpm `minimumReleaseAge`, no install scripts allowed. Done when: lint, types, tests and build pass.
+- [ ] Vite react-ts, strict TS flags (R4 §2.5), oxlint + Prettier, Vitest + Testing Library + MSW, TanStack Router + Query + Table, Tailwind CSS + shadcn/ui (components in `src/shared/ui`); folders as in `CLAUDE.md` → Structure; keep pnpm `minimumReleaseAge`, no install scripts allowed. Check the version, licence and advisories of each library that R4 does not cover. Done when: lint, types, tests and build pass.
 - [ ] WXT skeleton (exact version), minimal permissions, no remote code. Done when: it loads in Chromium and calls `/health`.
 
 **0.7 Hooks** (R4 §8)
@@ -92,7 +93,7 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 **0.12 Final check**
 - [ ] Fresh clone → `mise run setup` → `mise run check` in ≤ 15 min; CI green; planted secret blocked; direct push refused. Done when: a second person or a fresh Claude session does it from the README only.
 
-**Should (weeks 2 to 4):** SSH commit signing · issue forms, labels, milestones · Semgrep + weekly pip-audit job · rising coverage floor · hypothesis tests for scoring · Playwright E2E (2-3 journeys + extension) · OpenTelemetry + local traces · nightly evals with model graders · CONTRIBUTING.md, SECURITY.md · settings-based feature flags.
+**Should (weeks 2 to 4):** SSH commit signing · issue forms, labels, milestones · Semgrep + weekly pip-audit job · rising coverage floor · hypothesis tests for scoring · Playwright E2E (2-3 journeys + extension) · OpenTelemetry + local traces · nightly evals with model graders · settings-based feature flags.
 
 ---
 
@@ -141,3 +142,6 @@ Deployment (DevOps) · competitor analysis · paid keyword data · RLS + outside
 | 2026-10-06 | Review: removed repeats; session habits moved here from `CLAUDE.md` | Keep both files small |
 | 2026-10-06 | `CLAUDE.md` kept as `CLAUDE.template.md` until copied; PDF rebuilt with every plan change (`mise run docs:pdf`); import-linter uses `protected`/`forbidden` contracts | Owner decision; contract check |
 | 2026-10-06 | `PLAN.md` and `CLAUDE.md` stay at the repo root; no `CLAUDE.template.md` | Owner decision |
+| 2026-10-07 | Frontend: TanStack Router + Table, Tailwind CSS + shadcn/ui; React Hook Form + Zod (Phase 2); Recharts (Phase 5); web folder layout | Owner decision |
+| 2026-10-07 | Add `.gitattributes` (LF endings, generated files) and folder READMEs to step 0.2 | Senior review of the repo layout |
+| 2026-10-07 | CONTRIBUTING.md and SECURITY.md moved from Should to step 0.2; `db:down` task added; each mise task names the step that makes its input | Owner decision |

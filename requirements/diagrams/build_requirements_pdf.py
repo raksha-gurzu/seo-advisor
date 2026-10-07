@@ -249,7 +249,7 @@ D["setup"] = graph([
         n("C1", "step", "0.3 Python", "uv, ruff, mypy, pytest,\nSettings"),
         n("C2", "store", "0.4 Database", "Compose, Alembic,\nfirst migration, fixtures"),
         n("C3", "step", "0.5 API", "FastAPI, errors, request ID,\nlogs, client generation"),
-        n("C4", "step", "0.6 Web + extension", "Vite, oxlint, Vitest, WXT"),
+        n("C4", "step", "0.6 Web + extension", "Vite, TanStack, shadcn/ui,\noxlint, Vitest, WXT"),
     ]),
     n("D", "gate", "0.7 Hooks", "prek: hygiene, gitleaks,\nformat, lint"),
     n("E", "gate", "0.8 CI and GitHub", "required check, ruleset,\nDependabot, PR template"),
@@ -586,7 +586,7 @@ P.append(page("15. Technology stack", table(
      ["Database", "PostgreSQL 18 + pgvector 0.8.7, SQLAlchemy 2.1 (sync), psycopg 3, Alembic 1.20", "Sync code is simpler for new engineers and fits DBOS (S39)."],
      ["Jobs", "DBOS 3.2 on the same PostgreSQL", "Durable steps and schedules without a second server (S22)."],
      ["Quality (Python)", "ruff 0.16 (lint and format), mypy 2.4 --strict, pytest 9.1 strict, testcontainers 4.15", "One type checker as the gate. Tests use a real database (S27, S28)."],
-     ["Web app", "React 19.3, TypeScript 6.0.3, Vite 8.3, pnpm 12, TanStack Query, oxlint + Prettier, Vitest 5", "TypeScript 7 has no tool API until 7.1. The Vite template uses oxlint (S29)."],
+     ["Web app", "React 19.3, TypeScript 6.0.3, Vite 8.3, pnpm 12, TanStack Router, Query and Table, Tailwind CSS + shadcn/ui, oxlint + Prettier, Vitest 5. React Hook Form + Zod from Phase 2. Recharts from Phase 5", "TypeScript 7 has no tool API until 7.1. The Vite template uses oxlint (S29)."],
      ["API client", "openapi-typescript 7.13 + openapi-fetch 0.17", "Small and stable. CI fails if the client is out of date."],
      ["Extension", "WXT 0.21 (Manifest V3)", "Less custom build code. Shares Vite, React and TypeScript with the web app (S30)."],
      ["Logs and traces", "structlog 26.1, OpenTelemetry 1.45 (later step)", "Logs with request ID from day 1 (S38)."],
@@ -614,7 +614,7 @@ P.append(page("17. Setup checklist, part 1", table(
      ["0.3 Python base", "pyproject.toml, uv.lock, dependency groups (dev, test, lint), a 7-day delay for new package releases (exclude-newer), src layout. ruff rules E F W I UP B SIM S ASYNC PT RUF DTZ N. mypy --strict with the Pydantic plugin. pytest strict mode and markers (unit, integration, e2e, live). import-linter protected and forbidden contracts for the feature rules. (Do not use the independence contract. It also blocks the allowed calls through service.py.) A vulnerability check task (<code>mise run audit</code>, pip-audit). A Settings class that reads all configuration from the environment and stops at start if a key is missing.", "<code>mise run check</code> passes. A forbidden import between features fails the check. A missing key stops start-up with a clear message."],
      ["0.4 Database base", "Docker Compose with the pgvector image. Mount the volume at /var/lib/postgresql (PostgreSQL 18 changed this path, S32). SQLAlchemy base with the Alembic naming convention. First migration: vector extension, uuidv7() keys, timestamps with time zone, first tables. Test fixtures: testcontainers starts one test database for each session, rollback after each test, DBOS reset. Seed script with 2 fake sites.", "Upgrade and <code>alembic check</code> pass on an empty database. An integration test passes twice in a row."],
      ["0.5 API base", "FastAPI under /api/v1 with a health route. An error handler for RFC 9457 problem details (FastAPI has none, S40). Request ID middleware. structlog. An operation ID on each route. A task that exports openapi.json and generates the TypeScript client.", "An error returns application/problem+json with the request ID. The web app calls /health through the generated client."],
-     ["0.6 Web and extension base", "Vite react-ts template with strict TypeScript flags, oxlint, Prettier, Vitest and TanStack Query. Folders src/features and src/shared. Keep the pnpm release delay. Allow no install scripts until a package needs one. WXT extension skeleton with minimal permissions and no remote code.", "Lint, type check, tests and build pass. The extension loads in Chromium and calls /health."]],
+     ["0.6 Web and extension base", "Vite react-ts template with strict TypeScript flags, oxlint, Prettier, Vitest, Testing Library and MSW. TanStack Router, Query and Table. Tailwind CSS and shadcn/ui, with the components in src/shared/ui. Folders app, routes, features and shared, as in CLAUDE.md. Check the version, licence and advisories of each library that R4 does not cover. Keep the pnpm release delay. Allow no install scripts until a package needs one. WXT extension skeleton with minimal permissions and no remote code.", "Lint, type check, tests and build pass. The extension loads in Chromium and calls /health."]],
     ["14%", "56%", "30%"]),
     "The detail and the sources for each step are in research file R4 (requirements/research/04-project-setup.md)."))
 
@@ -628,7 +628,7 @@ P.append(page("18. Setup checklist, part 2", table(
      ["0.12 Final check", "Fresh clone, setup, check, CI, secret block and push block, all from the README only.", "A second person or a new Claude session completes it in 15 minutes or less."]],
     ["15%", "55%", "30%"]) + """
 <h2>Should do in weeks 2 to 4</h2>
-<p>SSH commit signing. Issue forms, labels and milestones for each phase. Semgrep and a weekly dependency audit. A coverage floor that only goes up. Property tests for scoring code. 2 or 3 Playwright tests and one extension test. OpenTelemetry with a local trace viewer. Nightly evals with model graders. CONTRIBUTING.md, SECURITY.md and an OWASP ASVS level 1 checklist. Feature flags in the settings.</p>
+<p>SSH commit signing. Issue forms, labels and milestones for each phase. Semgrep and a weekly dependency audit. A coverage floor that only goes up. Property tests for scoring code. 2 or 3 Playwright tests and one extension test. OpenTelemetry with a local trace viewer. Nightly evals with model graders. An OWASP ASVS level 1 checklist. Feature flags in the settings.</p>
 <div class="caution">CAUTION: GitHub secret scanning and push protection cost money on a private repository. Use gitleaks in the hooks and in CI until the budget allows the paid feature (S33).</div>"""))
 
 P.append(page("19. Working with Claude Code", table(
@@ -710,7 +710,9 @@ P.append(page("22. Tasks, phases 4 and 5, later work and change log", table(
      ["6 Oct 2026", "Modular monolith grouped by feature. Security rules in CLAUDE.md", "Owner decision"],
      ["6 Oct 2026", "Review: repeated content removed. Session habits for people moved from CLAUDE.md to plan.md", "Keep both files small"],
      ["6 Oct 2026", "CLAUDE.md kept as CLAUDE.template.md until it is copied. The PDF is rebuilt with every plan change. import-linter uses protected and forbidden contracts", "Owner decision. Contract check"],
-     ["6 Oct 2026", "PLAN.md and CLAUDE.md stay at the repo root. There is no CLAUDE.template.md", "Owner decision"]],
+     ["6 Oct 2026", "PLAN.md and CLAUDE.md stay at the repo root. There is no CLAUDE.template.md", "Owner decision"],
+     ["7 Oct 2026", "Frontend: TanStack Router and Table, Tailwind CSS and shadcn/ui. React Hook Form and Zod in Phase 2. Recharts in Phase 5. Web folder layout", "Owner decision"],
+     ["7 Oct 2026", ".gitattributes and folder READMEs added to step 0.2. CONTRIBUTING.md and SECURITY.md moved from Should to step 0.2. A db:down task added", "Owner decision"]],
     ["14%", "56%", "30%"]),
     "When a strategy changes, strike the old task in PLAN.md, add a line to this change log, and update this PDF and the ADR."))
 

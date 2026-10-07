@@ -1,0 +1,17 @@
+# MyPipit (test site). Read by `mise run inventory:discover`; slice 2 loads it into the database.
+# Page types: the first pattern that matches the URL path wins. "*" is exactly one path part.
+# Source: experiments/2026-10-07-mypipit-sitemap/README.md (owner approved, 7 Oct 2026).
+
+tenant = "MyPipit"
+base_url = "https://marketplace.mypipit.com"
+language = "en"
+
+page_types = [
+  { pattern = "/blog", page_type = "blog_index" },
+  { pattern = "/blog/category/*", page_type = "blog_category" },
+  { pattern = "/blog/*", page_type = "blog_post" },
+  { pattern = "/marketplace", page_type = "listing_index" },
+  { pattern = "/marketplace/*", page_type = "listing" },
+  { pattern = "/pages/*", page_type = "static" },
+  { pattern = "/sellers/*", page_type = "seller" },
+]

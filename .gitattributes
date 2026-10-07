@@ -1,0 +1,17 @@
+# Same line endings on every machine
+* text=auto eol=lf
+
+# Binary files
+*.pdf binary
+*.png binary
+*.jpg binary
+*.ico binary
+
+# Generated files: GitHub folds them in reviews
+uv.lock linguist-generated=true
+pnpm-lock.yaml linguist-generated=true
+packages/api-client/** linguist-generated=true
+packages/api-client/README.md -linguist-generated
+apps/web/src/routeTree.gen.ts linguist-generated=true
+requirements/diagrams/*.svg linguist-generated=true
+requirements/diagrams/requirements.html linguist-generated=true

@@ -67,7 +67,7 @@ apps/extension/    thin client: no logic, no keys
 A feature folder holds `api.py`, `service.py` (its public functions), `schemas.py`, `models.py`, `repository.py`, `workflows.py` and `prompts/` if it calls an LLM.
 - A feature uses another feature only through its `service.py` (import-linter `protected` contracts check this).
 - `core/` and `integrations/` never import a feature. Vendor APIs are called only in `integrations/`.
-- A new feature = a new folder + one line in `main.py`; its tables go into the shared migration history.
+- A new feature = a new folder + one line in `main.py` + its two import-linter contracts (template in `pyproject.toml`); its tables go into the shared migration history.
 
 ## Rules
 

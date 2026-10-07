@@ -53,9 +53,9 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 - [x] `mise.toml`: tool pins + tasks `setup dev test lint typecheck check audit db:up db:down db:migrate db:seed gen-client evals docs:pdf` (`docs:pdf` rebuilds the requirements PDF; needs Node + `@hpcc-js/wasm-graphviz` and Chromium). Done when: `mise run setup` works on a fresh clone.
 
 **0.3 Python** (R4 §1, §5.3, §11.4)
-- [ ] `pyproject.toml`, `uv.lock`, groups `dev test lint`, `exclude-newer = "7 days"`, src layout with `core/`, `integrations/`, empty `features/`. Done when: `uv sync --locked` passes.
-- [ ] ruff (E F W I UP B SIM S ASYNC PT RUF DTZ N), mypy --strict + Pydantic plugin, pytest strict + markers `unit integration e2e live`, import-linter `protected` + `forbidden` contracts (a feature's models and repository are private; not `independence`, which would also block `service.py`), pip-audit. Done when: `mise run check` passes and a forbidden import fails it.
-- [ ] `Settings` from env, `SecretStr` keys, fail fast. Done when: a missing key stops start-up with a clear message.
+- [x] `pyproject.toml`, `uv.lock`, groups `dev test lint`, `exclude-newer = "7 days"`, src layout with `core/`, `integrations/`, empty `features/`. Done when: `uv sync --locked` passes.
+- [x] ruff (E F W I UP B SIM S ASYNC PT RUF DTZ N), mypy --strict + Pydantic plugin, pytest strict + markers `unit integration e2e live`, import-linter `protected` + `forbidden` contracts (a feature's models and repository are private; not `independence`, which would also block `service.py`), pip-audit. Done when: `mise run check` passes and a forbidden import fails it.
+- [x] `Settings` from env, `SecretStr` keys, fail fast. Done when: a missing key stops start-up with a clear message.
 
 **0.4 Database** (R4 §5.1, §13)
 - [ ] Compose: pgvector image, volume at `/var/lib/postgresql`, health check, `CREATE EXTENSION vector`. Done when: `mise run db:up` is healthy.
@@ -145,3 +145,4 @@ Deployment (DevOps) · competitor analysis · paid keyword data · RLS + outside
 | 2026-10-07 | Frontend: TanStack Router + Table, Tailwind CSS + shadcn/ui; React Hook Form + Zod (Phase 2); Recharts (Phase 5); web folder layout | Owner decision |
 | 2026-10-07 | Add `.gitattributes` (LF endings, generated files) and folder READMEs to step 0.2 | Senior review of the repo layout |
 | 2026-10-07 | CONTRIBUTING.md and SECURITY.md moved from Should to step 0.2; `db:down` task added; each mise task names the step that makes its input | Owner decision |
+| 2026-10-07 | Step 0.3: `protected` contracts are added per feature (template in `pyproject.toml`); pip-audit checks `uv.lock`; pnpm checks join `check` in step 0.6; the 7-day delay gives ruff 0.16.9 and mypy 2.3.1 | One wildcard contract cannot limit a feature to its own internals; owner decision |

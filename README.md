@@ -21,7 +21,7 @@ Do these steps:
 1. Clone the repository.
 2. Go into the repository folder.
 3. Run `mise trust` to let mise read `mise.toml`.
-4. Run `mise run setup` to install the tools and make your `.env` file.
+4. Run `mise run setup` to install the tools and the Python packages, and to make your `.env` file.
 5. Run `mise run check` to make sure that everything works (from step 0.3).
 6. Run `mise run dev` to start the API and the web app (from step 0.6).
 
@@ -29,7 +29,7 @@ Do these steps:
 
 | Command | What it does | Works from |
 |---|---|---|
-| `mise run setup` | Installs the tools and makes `.env`. Later steps add dependencies and the database. | Now |
+| `mise run setup` | Installs the tools and the Python packages, and makes `.env`. Later steps add the database and the web app. | Now |
 | `mise run dev` | Starts the API and the web app. | Step 0.6 |
 | `mise run check` | Runs lint, type checks and tests. Shows only failures. | Step 0.3 |
 | `mise run test -- apps/api/tests/<feature>` | Runs the tests for one feature. | Step 0.3 |

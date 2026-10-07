@@ -712,7 +712,8 @@ P.append(page("22. Tasks, phases 4 and 5, later work and change log", table(
      ["6 Oct 2026", "CLAUDE.md kept as CLAUDE.template.md until it is copied. The PDF is rebuilt with every plan change. import-linter uses protected and forbidden contracts", "Owner decision. Contract check"],
      ["6 Oct 2026", "PLAN.md and CLAUDE.md stay at the repo root. There is no CLAUDE.template.md", "Owner decision"],
      ["7 Oct 2026", "Frontend: TanStack Router and Table, Tailwind CSS and shadcn/ui. React Hook Form and Zod in Phase 2. Recharts in Phase 5. Web folder layout", "Owner decision"],
-     ["7 Oct 2026", ".gitattributes and folder READMEs added to step 0.2. CONTRIBUTING.md and SECURITY.md moved from Should to step 0.2. A db:down task added", "Owner decision"]],
+     ["7 Oct 2026", ".gitattributes and folder READMEs added to step 0.2. CONTRIBUTING.md and SECURITY.md moved from Should to step 0.2. A db:down task added", "Owner decision"],
+     ["7 Oct 2026", "Step 0.3: protected import contracts are added for each feature. pip-audit checks uv.lock. The pnpm checks join mise run check in step 0.6. The 7-day delay gives ruff 0.16.9 and mypy 2.3.1", "One wildcard contract cannot limit a feature to its own internals. Owner decision"]],
     ["14%", "56%", "30%"]),
     "When a strategy changes, strike the old task in PLAN.md, add a line to this change log, and update this PDF and the ADR."))
 

@@ -7,22 +7,22 @@ digraph G {
   subgraph cluster_feat {
     label=<<B>features/ (each folder: api, service, schemas, models, repository, workflows)</B>> fontsize=11 fontcolor="#3b4654" labeljust=l
     style="rounded,dashed" color="#2e7d4f" bgcolor="#f3fbf5" margin=10
-  F1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>sites</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  F2 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>inventory</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  F3 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>audits</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  F4 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>search_data</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  F5 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>content</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  F6 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>drafts</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  F7 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>reports</B></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  F1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>sites</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">tenants, sites</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  F2 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>inventory</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">sitemap list,<BR/>fetch one page</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  F3 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>audits</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">rules, runs,<BR/>findings</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  F6 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>drafts</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">AI suggestions<BR/>(DeepSeek)</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  F4 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>search_data</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">Phase 3</FONT></TD></TR></TABLE>> shape="box" style="filled,dashed" fillcolor="#f2f5f9" color="#7a8899" penwidth=1.7];
+  F5 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>content</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">Phase 3</FONT></TD></TR></TABLE>> shape="box" style="filled,dashed" fillcolor="#f2f5f9" color="#7a8899" penwidth=1.7];
+  F7 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>reports</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">Phase 6</FONT></TD></TR></TABLE>> shape="box" style="filled,dashed" fillcolor="#f2f5f9" color="#7a8899" penwidth=1.7];
   }
   CORE [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>core/</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">config, db, ids, tenancy,<BR/>logging, errors</FONT></TD></TR></TABLE>> shape="cylinder" style="filled" fillcolor="#efe7fb" color="#6941c6" penwidth=1.7];
-  INT [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>integrations/</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">http fetch + SSRF guard,<BR/>Search Console, CrUX, LLM</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
-  MAIN -> F4 [lhead="cluster_feat"];
+  INT [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>integrations/</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">http fetch + SSRF guard,<BR/>LLM (DeepSeek); Search<BR/>Console, CrUX later</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
+  MAIN -> F3 [lhead="cluster_feat"];
   F3 -> F2 [label="service.py" style="dashed" color="#2e7d4f" constraint="false"];
-  F6 -> F5 [label="service.py" style="dashed" color="#2e7d4f" constraint="false"];
-  F4 -> CORE [ltail="cluster_feat"];
-  F4 -> INT [ltail="cluster_feat"];
+  F6 -> F3 [label="service.py" style="dashed" color="#2e7d4f" constraint="false"];
+  F3 -> CORE [ltail="cluster_feat"];
+  F3 -> INT [ltail="cluster_feat"];
   INT -> CORE [];
-  { rank=same; F1; F2; F3; F4; F5; F6; F7; }
+  { rank=same; F1; F2; F3; F6; F4; F5; F7; }
   { rank=same; CORE; INT; }
 }

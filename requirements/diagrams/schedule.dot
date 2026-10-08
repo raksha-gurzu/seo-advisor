@@ -1,43 +1,23 @@
 digraph G {
-  graph [rankdir=TB fontname="Arial" nodesep=0.4 ranksep=0.42 splines=spline bgcolor="transparent"
+  graph [rankdir=TB fontname="Arial" nodesep=0.5 ranksep=0.4 splines=spline bgcolor="transparent"
          pad=0.15 newrank=true compound=true];
   node  [fontname="Arial" fontsize=12 margin="0.14,0.07"];
   edge  [fontname="Arial" fontsize=11 color="#5a6675" penwidth=1.4 arrowsize=0.75];
-  T [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Schedule fires</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">per site: daily, weekly, monthly</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
-  L [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Which run?</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fff3d6" color="#c77700" margin="0.04" penwidth=1.7];
-  subgraph cluster_d {
-    label=<<B>Daily</B>> fontsize=11 fontcolor="#3b4654" labeljust=l
-    style="rounded,dashed" color="#9fb3c8" bgcolor="#f7f9fb" margin=10
-  D1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Health check</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">robots.txt, sitemap,<BR/>status codes, new URLs</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  }
-  subgraph cluster_w {
-    label=<<B>Weekly</B>> fontsize=11 fontcolor="#3b4654" labeljust=l
-    style="rounded,dashed" color="#9fb3c8" bgcolor="#f7f9fb" margin=10
-  W1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Page audit</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">all rules on changed<BR/>and sampled pages</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  }
-  subgraph cluster_m {
-    label=<<B>Monthly</B>> fontsize=11 fontcolor="#3b4654" labeljust=l
-    style="rounded,dashed" color="#9fb3c8" bgcolor="#f7f9fb" margin=10
-  M1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Full audit + keywords</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">all pages, keyword map,<BR/>review dates, speed (CrUX)</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  }
-  SC [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Search Console sync</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">daily rows (2-3 days delay)</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
-  DF [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Compare with the last run</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">new, fixed and returning<BR/>findings</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  P [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Score and rank the work</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">impact x confidence ÷ effort</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  Q [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Needs</B><BR/><B>action?</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fff3d6" color="#c77700" margin="0.04" penwidth=1.7];
-  OK [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Save trend only</B></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
-  AL [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Create work items</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">in the content queue<BR/>+ alert or Emitii task</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  T -> L [];
-  L -> D1 [label=<<B> daily </B>> fontcolor="#3b4654"];
-  L -> W1 [label=<<B> weekly </B>> fontcolor="#3b4654"];
-  L -> M1 [label=<<B> monthly </B>> fontcolor="#3b4654"];
-  D1 -> DF [];
-  W1 -> DF [];
-  M1 -> DF [];
-  SC -> DF [];
-  DF -> P [];
-  P -> Q [];
-  Q -> OK [label=<<B> No </B>> fontcolor="#b42318"];
-  Q -> AL [label=<<B> Yes </B>> fontcolor="#2e7d4f"];
-  { rank=same; D1; W1; M1; SC; }
-  { rank=same; OK; AL; }
+  T [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>A person asks for a new check</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">after the client saved a change</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  F [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Fetch the page again</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">new snapshot (same safe fetcher)</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  A [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Audit again</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">same rules version, same keyword</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  DF [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Compare with the last run</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">new, fixed and returning findings</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  Q [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>All findings</B><BR/><B>fixed?</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fff3d6" color="#c77700" margin="0.04" penwidth=1.7];
+  OK [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Mark the page as done</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">keep both runs as history</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
+  BK [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Back to suggestions</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">for the open findings</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  LT [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Phase 3: scheduled audits</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">DBOS runs daily, weekly and<BR/>monthly for the whole site</FONT></TD></TR></TABLE>> shape="box" style="filled,dashed" fillcolor="#f2f5f9" color="#7a8899" penwidth=1.7];
+  T -> F [];
+  F -> A [];
+  A -> DF [];
+  DF -> Q [];
+  Q -> OK [label=<<B> Yes </B>> fontcolor="#2e7d4f"];
+  Q -> BK [label=<<B> No </B>> fontcolor="#b42318"];
+  LT -> F [style="dashed" label=<<B> later </B>> fontcolor="#3b4654"];
+  { rank=same; T; LT; }
+  { rank=same; OK; BK; }
 }

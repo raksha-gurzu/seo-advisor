@@ -82,127 +82,113 @@ D = {}
 # Architecture (layers) ---------------------------------------------------------------------
 D["arch"] = graph([
     *cluster("people", "People", [
-        n("U1", "human", "Gurzu SEO team", "audits, edits, first review"),
-        n("U2", "human", "Client team", "MyPipit, extendmy.life:\nfinal approval, publishes"),
-        n("U3", "later", "Expert reviewer (health)", "rule to decide before\nextendmy.life drafts"),
+        n("U1", "human", "Gurzu SEO team", "pastes a URL, reviews\nfindings and suggestions"),
+        n("U2", "human", "Client team", "MyPipit: copies approved\ntext into its editor, saves"),
+        n("U3", "later", "Expert reviewer (health)", "extendmy.life, Phase 5"),
     ], color="#c9a96b", bg="#fffaf0"),
     *cluster("clients", "Interfaces", [
-        n("WEB", "step", "Web dashboard", "React + TypeScript:\nsites, findings, content queue,\nreviews, reports"),
-        n("EXT", "ext", "Chrome extension", "shows suggestions in each\nsite's editor, fills fields\nwhen a person accepts"),
+        n("WEB", "step", "Web app", "React + TypeScript:\nanalyse a page, findings,\nsuggestions"),
+        n("EXT", "later", "Chrome extension (Phase 4)", "fills the site editor\nwhen a person accepts"),
     ]),
     *cluster("core", "seo-advisor service (Python, FastAPI)", [
-        n("API", "step", "API", "auth, roles, tenants, sites,\ncontent, reviews, reports"),
-        n("WF", "step", "Workflows (DBOS)", "durable steps, per-site cron,\nretries, queues per host"),
-        n("CR", "step", "Crawler", "sitemap + httpx,\nrobots.txt, rate limits"),
-        n("AU", "step", "Audit engine", "rule sets per page type\nand language"),
-        n("KW", "step", "Keyword service", "Search Console queries,\nautocomplete, page map"),
-        n("DR", "step", "Draft service", "AI drafts EN and DE\nwith [ADD: ...]"),
-        n("CK", "gate", "Checks", "facts, copy, language,\nhealth (YMYL) rules"),
-        n("RP", "step", "Reports and alerts", "weekly report, alerts,\nEmitii tasks"),
-        "    API -> CR [style=invis]; WF -> AU [style=invis]; RP -> KW [style=invis];",
-        "    CR -> DR [style=invis]; AU -> CK [style=invis];",
+        n("API", "step", "API", "sites, pages, audit runs,\nsuggestions, reviews"),
+        n("FP", "step", "Fetch one page", "safe fetcher: SSRF guard,\nrobots.txt, rate limit"),
+        n("EX", "step", "Extract", "title, meta, headings,\nimages, links, structured\ndata, main text"),
+        n("AU", "step", "Audit rules", "rules per page type,\nevidence and source"),
+        n("DR", "step", "Suggest (DeepSeek)", "fixes with [ADD: ...],\na person reviews"),
+        n("CK", "gate", "Checks", "no invented facts,\nno copied text"),
+        n("CR", "later", "Crawler (Phase 3)", "all pages of a site"),
+        n("WF", "later", "Schedules (Phase 3)", "DBOS: daily, weekly,\nmonthly runs"),
+        n("RP", "later", "Reports (Phase 6)", "outcomes, weekly report"),
+        "    API -> AU [style=invis]; FP -> DR [style=invis]; EX -> CK [style=invis];",
+        "    AU -> CR [style=invis]; DR -> WF [style=invis]; CK -> RP [style=invis];",
     ], color="#6941c6", bg="#faf8ff"),
-    n("DB", "store", "PostgreSQL 18 + pgvector", "inventory, versions, findings,\nworkflow events, Search Console\nrows, traces, job state"),
+    n("DB", "store", "PostgreSQL 18", "sites, pages, snapshots,\naudit runs, findings,\nsuggestions, AI call log"),
     *cluster("data", "Data sources (read-only)", [
-        n("S1", "page", "Client public pages", "MyPipit, extendmy.life"),
-        n("S2", "source", "Search Console API", "clicks, queries, positions,\nindex status"),
-        n("S3", "source", "CrUX API", "Core Web Vitals\nfor real visitors"),
-        n("S4", "source", "Bing Webmaster API", "Bing data (German\ndesktop share)"),
-        n("S5", "source", "AI models", "writer + checker from\nanother model family"),
+        n("S1", "page", "One client page", "a MyPipit blog post\n(the URL that a person gives)"),
+        n("S5", "source", "AI model", "DeepSeek writes\nsuggestions"),
+        n("S2", "later", "Later sources", "Search Console (Phase 3),\nCrUX, Bing Webmaster"),
     ], color="#0b5cad", bg="#f4f8fe"),
-    e("U1", "WEB"), e("U2", "WEB"), e("U2", "EXT"), e("U3", "WEB", style="dashed"),
-    e("WEB", "API", lhead="cluster_core"), e("EXT", "API", lhead="cluster_core"),
-    e("CK", "DB", ltail="cluster_core"), e("DB", "S3", lhead="cluster_data", style="invis"),
-    e("CR", "S1", ltail="cluster_core", lhead="cluster_data", label="read only"),
-    same("U1", "U2", "U3"), same("WEB", "EXT"), same("API", "WF", "RP"), same("CR", "AU", "KW"), same("DR", "CK"),
-    same("S1", "S2", "S3", "S4", "S5"),
+    e("U1", "WEB"), e("U2", "WEB"), e("U2", "EXT", style="dashed"), e("U3", "WEB", style="dashed"),
+    e("WEB", "API", lhead="cluster_core"), e("EXT", "API", lhead="cluster_core", style="dashed"),
+    e("CK", "DB", ltail="cluster_core"), e("DB", "S2", lhead="cluster_data", style="invis"),
+    e("FP", "S1", ltail="cluster_core", lhead="cluster_data", label="read only"),
+    same("U1", "U2", "U3"), same("WEB", "EXT"), same("API", "FP", "EX"), same("AU", "DR", "CK"), same("CR", "WF", "RP"),
+    same("S1", "S5", "S2"),
 ], nodesep=0.3, ranksep=0.45)
 
 # Data model (grid, header colour = group) -------------------------------------------------
-TEN, INV, CON, AUD, SEA, OPS = ("#344054", "#e4e7ec"), ("#0b2a4a", "#dbe7f5"), ("#2e7d4f", "#dcf2e3"), ("#b42318", "#fbe1de"), ("#0b5cad", "#e1ecfb"), ("#6941c6", "#ece4fb")
+TEN, INV, AUD, OPS = ("#344054", "#e4e7ec"), ("#0b2a4a", "#dbe7f5"), ("#b42318", "#fbe1de"), ("#6941c6", "#ece4fb")
+CON = ("#2e7d4f", "#dcf2e3")
+LATER = ("#7a8899", "#f2f5f9")
 D["datamodel"] = graph([
     tbl("T1", "tenants", ["id (uuidv7)", "name"], *TEN),
-    tbl("T2", "users", ["id", "tenant_id", "email", "role"], *TEN),
-    tbl("T3", "sites", ["id", "tenant_id", "base_url", "languages", "is_ymyl", "gsc_property"], *TEN),
-    tbl("O1", "schedules", ["site_id", "kind, cron", "next_run"], *OPS),
-    tbl("I1", "pages", ["id", "site_id", "url, language", "page_type", "hreflang_group", "status"], *INV),
-    tbl("A1", "audit_runs", ["id", "site_id", "kind", "code_version", "started, finished"], *AUD),
-    tbl("A3", "rules", ["id", "page_type, language", "source", "enabled"], *AUD),
-    tbl("G1", "keywords", ["id", "text", "language, country"], *SEA),
-    tbl("G3", "gsc_rows", ["site_id, date", "page, query", "clicks, impressions", "ctr, position"], *SEA),
-    tbl("I2", "page_snapshots", ["page_id, fetched_at", "http_status", "title, meta, h1", "canonical, hreflang", "text_hash"], *INV),
-    tbl("C1", "content_items", ["id", "page_id", "field", "current_version_id", "current_state"], *CON),
-    tbl("A2", "findings", ["run_id, page_id", "rule_id", "severity, evidence", "status"], *AUD),
-    tbl("G2", "keyword_page_map", ["keyword_id", "page_id", "role (primary/secondary)"], *SEA),
-    tbl("O3", "outcomes", ["page_id", "published_at", "gsc_before, after_8w"], *OPS),
-    tbl("C2", "content_versions", ["id, item_id", "version_no", "source (crawl/ai/human)", "body_jsonb", "major_change", "created_by, created_at"], *CON),
-    tbl("C3", "content_state_events", ["item_id", "from_state, to_state", "actor, reason, created_at"], *CON),
-    tbl("O2", "llm_calls", ["job_id", "model asked/returned", "prompt_version", "tokens, cost"], *OPS),
-    tbl("C4", "reviews", ["version_id", "reviewer", "role (2i/expert/client)", "verdict, comment"], *CON),
-    e("T1", "T2", arrowhead="crow"), e("T1", "T3", arrowhead="crow"), e("T3", "O1", arrowhead="crow"),
-    e("T3", "I1", arrowhead="crow"), e("T3", "A1", arrowhead="crow"), e("T3", "G3", arrowhead="crow"),
-    e("I1", "I2", arrowhead="crow"), e("I1", "C1", arrowhead="crow"), e("A1", "A2", arrowhead="crow"), e("A3", "A2", arrowhead="crow"),
-    e("G1", "G2", arrowhead="crow"), e("I1", "G2", arrowhead="crow"), e("I1", "O3", arrowhead="crow"),
-    e("C1", "C2", arrowhead="crow"), e("C1", "C3", arrowhead="crow"), e("C2", "C4", arrowhead="crow"),
-    same("T1", "T2"), same("T3", "O1"), same("I1", "A1", "A3", "G1", "G3"), same("I2", "C1", "A2", "G2", "O3"),
-    same("C2", "C3", "O2"),
-], nodesep=0.3, ranksep=0.45)
+    tbl("T3", "sites", ["id", "tenant_id", "base_url", "language", "page_types (rules)"], *TEN),
+    tbl("I1", "pages", ["id", "site_id", "url", "page_type", "(only pages that a", "person analyses)"], *INV),
+    tbl("I2", "page_snapshots", ["page_id, fetched_at", "http_status, final_url", "html (size limit)", "html_hash", "extracted (JSONB)"], *INV),
+    tbl("A1", "audit_runs", ["id", "page_id, snapshot_id", "keyword", "rules_version", "started, finished"], *AUD),
+    tbl("A2", "findings", ["run_id", "rule_id, severity", "evidence: found,", "expected, selector", "source, status"], *AUD),
+    tbl("C1", "suggestions", ["run_id, finding_id", "field, text", "status (accepted,", "edited, rejected)"], *CON),
+    tbl("O2", "llm_calls", ["model", "prompt_version", "tokens, cost"], *OPS),
+    tbl("L1", "later (Phase 3 to 6)", ["users, schedules", "keywords, gsc_rows", "keyword_page_map", "content_items,", "content_versions,", "content_state_events,", "reviews, outcomes"], *LATER),
+    e("T1", "T3", arrowhead="crow"), e("T3", "I1", arrowhead="crow"), e("I1", "I2", arrowhead="crow"),
+    e("I1", "A1", arrowhead="crow"), e("I2", "A1", arrowhead="crow"), e("A1", "A2", arrowhead="crow"),
+    e("A1", "C1", arrowhead="crow"), e("A2", "C1", arrowhead="crow", style="dashed"), e("C1", "O2", arrowhead="crow", style="dashed"),
+    same("T1", "T3", "L1"), same("I1", "I2"), same("A1", "A2"), same("C1", "O2"),
+], nodesep=0.45, ranksep=0.5)
 
-# Onboarding ---------------------------------------------------------------------------------
+# Flow A: analyse one page ------------------------------------------------------------------
 D["onboard"] = graph([
-    n("S", "start", "Add a site", "base URL, languages,\nYMYL yes or no"),
-    n("A", "source", "Connect Search Console", "read-only access to the\nproperty (domain property)"),
-    n("B", "step", "Read robots.txt and sitemaps", "sitemap index, one sitemap\nper type and language"),
-    n("C", "step", "Build the page inventory", "one row per URL and language,\nhreflang groups EN-DE"),
-    n("D", "step", "Classify page types", "listing, article, category,\nstatic. Rules come per type"),
-    n("E", "step", "Baseline crawl and audit", "all pages, all rules"),
-    n("F", "step", "Baseline Search Console", "16 months of page and query data"),
-    n("G", "human", "SEO team checks the baseline", "removes false findings,\nsets priorities"),
-    n("H", "start", "Site is live in the platform", "schedules start"),
-    e("S", "A"), e("A", "B"), e("B", "C"), e("C", "D"), e("D", "E"), e("D", "F"), e("E", "G"), e("F", "G"), e("G", "H"),
-    same("E", "F"),
-], nodesep=0.5, ranksep=0.36)
+    n("S", "start", "1. Paste a URL and a keyword", "for example a MyPipit blog post\nand \"Annapurna base camp trek\""),
+    n("G", "decision", "On a registered\nsite?"),
+    n("NO", "stop", "Refuse", "the tool reads only\nregistered sites"),
+    n("F", "step", "2. Fetch one page", "safe fetcher: robots.txt,\nrate limit, SSRF guard; snapshot"),
+    n("X", "step", "3. Extract the SEO content", "title, meta, headings, images,\nlinks, structured data, text"),
+    n("A", "step", "4. Audit with rules", "each finding: evidence and\nsource; \"unknown\" if not seen"),
+    n("SG", "step", "5. AI suggestions (DeepSeek)", "facts only from the page,\nother facts [ADD: ...]"),
+    n("CK", "gatedec", "Checks\npass?"),
+    n("RW", "step", "Rewrite once", "then fail"),
+    n("R", "human", "6. A person reviews", "accept, edit or reject; copy into\nthe site editor and save there.\nThe tool never publishes."),
+    n("RC", "start", "7. Check the page again", "new snapshot and audit run,\ncompared with the last run"),
+    e("S", "G"), e("G", "NO", "No"), e("G", "F", "Yes"), e("F", "X"), e("X", "A"), e("A", "SG"), e("SG", "CK"),
+    e("CK", "RW", "No"), e("RW", "CK"), e("CK", "R", "Yes"), e("R", "RC"),
+    e("RC", "A", "next round", style="dashed", constraint="false"),
+    same("G", "NO"), same("CK", "RW"),
+], nodesep=0.5, ranksep=0.3)
 
-# Scheduled audit ----------------------------------------------------------------------------
+# Flow B: check the page again (now); scheduled audits (Phase 3) -----------------------------
 D["schedule"] = graph([
-    n("T", "start", "Schedule fires", "per site: daily, weekly, monthly"),
-    n("L", "decision", "Which run?"),
-    *cluster("d", "Daily", [n("D1", "step", "Health check", "robots.txt, sitemap,\nstatus codes, new URLs")]),
-    *cluster("w", "Weekly", [n("W1", "step", "Page audit", "all rules on changed\nand sampled pages")]),
-    *cluster("m", "Monthly", [n("M1", "step", "Full audit + keywords", "all pages, keyword map,\nreview dates, speed (CrUX)")]),
-    n("SC", "source", "Search Console sync", "daily rows (2-3 days delay)"),
-    n("DF", "step", "Compare with the last run", "new, fixed and returning\nfindings"),
-    n("P", "step", "Score and rank the work", "impact x confidence ÷ effort"),
-    n("Q", "decision", "Needs\naction?"),
-    n("OK", "start", "Save trend only"),
-    n("AL", "step", "Create work items", "in the content queue\n+ alert or Emitii task"),
-    e("T", "L"), e("L", "D1", "daily"), e("L", "W1", "weekly"), e("L", "M1", "monthly"),
-    e("D1", "DF"), e("W1", "DF"), e("M1", "DF"), e("SC", "DF"), e("DF", "P"), e("P", "Q"),
-    e("Q", "OK", "No"), e("Q", "AL", "Yes"),
-    same("D1", "W1", "M1", "SC"), same("OK", "AL"),
-], nodesep=0.4, ranksep=0.42)
+    n("T", "human", "A person asks for a new check", "after the client saved a change"),
+    n("F", "step", "Fetch the page again", "new snapshot (same safe fetcher)"),
+    n("A", "step", "Audit again", "same rules version, same keyword"),
+    n("DF", "step", "Compare with the last run", "new, fixed and returning findings"),
+    n("Q", "decision", "All findings\nfixed?"),
+    n("OK", "start", "Mark the page as done", "keep both runs as history"),
+    n("BK", "step", "Back to suggestions", "for the open findings"),
+    n("LT", "later", "Phase 3: scheduled audits", "DBOS runs daily, weekly and\nmonthly for the whole site"),
+    e("T", "F"), e("F", "A"), e("A", "DF"), e("DF", "Q"), e("Q", "OK", "Yes"), e("Q", "BK", "No"),
+    e("LT", "F", "later", style="dashed"),
+    same("T", "LT"), same("OK", "BK"),
+], nodesep=0.5, ranksep=0.4)
 
-# Improvement and content generation ---------------------------------------------------------
+# Flow C: from finding to fix ----------------------------------------------------------------
 D["content"] = graph([
-    n("F", "start", "Work item", "from an audit finding or\nfrom the SEO team"),
-    n("T", "decision", "Template or\none page?"),
+    n("F", "start", "Finding on the page", "from the audit run"),
+    n("T", "decision", "Template or\nthis page?"),
     n("TF", "page", "Template fix request", "to the site's developers\n(fixes all pages of a type)"),
-    n("K", "step", "Choose keywords", "keyword map: one primary\nkeyword per page and language"),
-    n("DR", "step", "AI draft", "EN and DE. Facts only from\nthe page, others [ADD: ...]"),
+    n("DR", "step", "AI suggestion (DeepSeek)", "title, meta description, H1,\nalt text, content notes"),
     n("CK", "gatedec", "Checks\npass?"),
     n("RW", "step", "Rewrite once", "or mark the sentence"),
-    n("R1", "human", "Gurzu review (2i)", "second person, not the author:\naccuracy, tone, keywords"),
-    n("Y", "decision", "Health (YMYL)\nor German?"),
-    n("R2", "human", "Expert or native review", "medical expert (rule to decide),\nnative German speaker"),
-    n("R3", "human", "Client approval", "final approval"),
-    n("AP", "ext", "Apply in the site editor", "extension fills the fields;\na person clicks Save"),
-    n("V", "step", "Verify on the live site", "next crawl compares the\npublished page with the draft"),
-    n("M", "store", "Measure", "Search Console after\n4, 8 and 12 weeks"),
-    e("F", "T"), e("T", "TF", "template"), e("T", "K", "page"), e("K", "DR"), e("DR", "CK"),
-    e("CK", "RW", "No"), e("RW", "CK"), e("CK", "R1", "Yes"), e("R1", "Y"),
-    e("Y", "R2", "Yes"), e("Y", "R3", "No"), e("R2", "R3"), e("R3", "AP"), e("AP", "V"), e("V", "M"),
+    n("R1", "human", "Gurzu review", "accept, edit or reject;\nnot the author"),
+    n("Y", "later", "Expert or native review", "health (YMYL) or German:\nextendmy.life, Phase 5"),
+    n("AP", "human", "Copy into the site editor", "a person saves;\nextension in Phase 4"),
+    n("V", "step", "Check the page again", "Flow B"),
+    n("M", "later", "Measure (Phase 6)", "Search Console after\n4, 8 and 12 weeks"),
+    e("F", "T"), e("T", "TF", "template"), e("T", "DR", "page"), e("DR", "CK"),
+    e("CK", "RW", "No"), e("RW", "CK"), e("CK", "R1", "Yes"), e("R1", "AP"),
+    e("R1", "Y", "later", style="dashed"), e("Y", "AP", style="dashed"), e("AP", "V"), e("V", "M", style="dashed"),
     e("R1", "DR", "changes", style="dashed", constraint="false"),
-    same("T", "TF"), same("CK", "RW"), same("Y", "R2"),
+    same("T", "TF"), same("CK", "RW"), same("R1", "Y"),
 ], nodesep=0.45, ranksep=0.34)
 
 # Workflow states ----------------------------------------------------------------------------
@@ -227,20 +213,22 @@ D["states"] = graph([
 
 # Roadmap ------------------------------------------------------------------------------------
 D["roadmap"] = graph([
-    n("P0", "start", "Phase 0: set up the repo", "tools, CI, hooks, Claude Code,\nADRs, data model, AI base"),
-    n("P1", "step", "Phase 1: inventory and audit", "test site MyPipit: onboarding, crawler,\nrule engine, schedules, findings view"),
-    n("G1", "gatedec", "SEO team agrees\nfindings are\ncorrect?"),
-    n("P2", "step", "Phase 2: content workflow", "content items, versions, states,\nreviews, keyword map"),
-    n("P3", "step", "Phase 3: AI drafts + extension", "drafts with checks, extension\nfor the test site editor"),
-    n("G3", "gatedec", "Pilot targets\nmet?"),
-    n("P4", "step", "Phase 4: second site and languages", "test site extendmy.life: EN + DE,\nhreflang, native review, health rule"),
-    n("P5", "step", "Phase 5: measure and report", "outcomes, reports, alerts"),
-    n("P6", "later", "Later", "deployment with DevOps,\nmore sites, paid data,\nproduct features"),
+    n("P0", "start", "Phase 0: set up the repo", "0.1 to 0.3 done; other steps\nstart when a slice needs them"),
+    n("P1", "step", "Phase 1: one page, end to end", "MyPipit blog post: fetch, extract,\naudit with evidence, DeepSeek\nsuggestions, review (slices 1 to 5)"),
+    n("G1", "gatedec", "90% of findings\ncorrect, 7 of 10\naccepted?"),
+    n("P2", "step", "Phase 2: more page types", "listings, categories and\nstatic pages on MyPipit"),
+    n("P3", "step", "Phase 3: whole site", "crawler, schedules, Search Console,\ncontent workflow, work queue"),
+    n("G3", "gatedec", "Runs work for\n2 weeks?"),
+    n("P4", "step", "Phase 4: extension", "fills the site editor;\na person saves"),
+    n("P5", "step", "Phase 5: second site and languages", "test site extendmy.life: EN + DE,\nhreflang, native review, health rule"),
+    n("P6", "step", "Phase 6: measure and report", "outcomes, reports, alerts"),
+    n("PL", "later", "Later", "deployment with DevOps,\nmore sites, paid data"),
     n("FX", "step", "Fix rules and prompts"),
     e("P0", "P1"), e("P1", "G1"), e("G1", "P2", "Yes"), e("G1", "FX", "No"), e("FX", "P1"),
-    e("P2", "P3"), e("P3", "G3"), e("G3", "P4", "Yes"), e("G3", "FX", "No"), e("P4", "P5"), e("P5", "P6", style="dashed"),
+    e("P2", "P3"), e("P3", "G3"), e("G3", "P4", "Yes"), e("G3", "FX", "No"), e("P4", "P5"), e("P5", "P6"),
+    e("P6", "PL", style="dashed"),
     same("G1", "FX"),
-], nodesep=0.5, ranksep=0.36)
+], nodesep=0.5, ranksep=0.3)
 
 D["setup"] = graph([
     n("A", "start", "0.1 Machine", "mise, Docker, gh, Claude Code"),
@@ -279,17 +267,18 @@ D["method"] = graph([
 D["modules"] = graph([
     n("MAIN", "start", "main.py", "builds the app,\nmounts feature routers"),
     *cluster("feat", "features/ (each folder: api, service, schemas, models, repository, workflows)", [
-        n("F1", "step", "sites"), n("F2", "step", "inventory"), n("F3", "step", "audits"), n("F4", "step", "search_data"),
-        n("F5", "step", "content"), n("F6", "step", "drafts"), n("F7", "step", "reports"),
+        n("F1", "step", "sites", "tenants, sites"), n("F2", "step", "inventory", "sitemap list,\nfetch one page"),
+        n("F3", "step", "audits", "rules, runs,\nfindings"), n("F6", "step", "drafts", "AI suggestions\n(DeepSeek)"),
+        n("F4", "later", "search_data", "Phase 3"), n("F5", "later", "content", "Phase 3"), n("F7", "later", "reports", "Phase 6"),
     ], color="#2e7d4f", bg="#f3fbf5"),
     n("CORE", "store", "core/", "config, db, ids, tenancy,\nlogging, errors"),
-    n("INT", "source", "integrations/", "http fetch + SSRF guard,\nSearch Console, CrUX, LLM"),
-    e("MAIN", "F4", lhead="cluster_feat"),
+    n("INT", "source", "integrations/", "http fetch + SSRF guard,\nLLM (DeepSeek); Search\nConsole, CrUX later"),
+    e("MAIN", "F3", lhead="cluster_feat"),
     e("F3", "F2", label="service.py", style="dashed", color="#2e7d4f", constraint="false"),
-    e("F6", "F5", label="service.py", style="dashed", color="#2e7d4f", constraint="false"),
-    e("F4", "CORE", ltail="cluster_feat"), e("F4", "INT", ltail="cluster_feat"),
+    e("F6", "F3", label="service.py", style="dashed", color="#2e7d4f", constraint="false"),
+    e("F3", "CORE", ltail="cluster_feat"), e("F3", "INT", ltail="cluster_feat"),
     e("INT", "CORE"),
-    same("F1", "F2", "F3", "F4", "F5", "F6", "F7"), same("CORE", "INT"),
+    same("F1", "F2", "F3", "F6", "F4", "F5", "F7"), same("CORE", "INT"),
 ], nodesep=0.3, ranksep=0.6)
 
 D["legend"] = graph([
@@ -359,13 +348,13 @@ P = []
 P.append(f"""<section class="page cover">
 <div class="kicker">Gurzu · seo-advisor · Requirements</div>
 <h1>seo-advisor:<br>requirements and architecture</h1>
-<p class="lead">This document gives the requirements, the architecture and the start plan for <b>seo-advisor</b>, a platform that audits, improves and manages the SEO content of several websites. Two example sites, MyPipit and extendmy.life, are used to test it. The tool is general and is not shaped around these two sites. Read this document before you write code. The short work plan for Claude Code is <code>PLAN.md</code> at the repo root, next to <code>CLAUDE.md</code>. This PDF holds the same plan with reasons and diagrams.</p>
+<p class="lead">This document gives the requirements, the architecture and the start plan for <b>seo-advisor</b>, a platform that audits, improves and manages the SEO content of several websites. It starts with <b>one page</b>: a person gives the URL of one page and a keyword, and the tool does SEO on that page. The whole site comes later. Two example sites, MyPipit and extendmy.life, are used to test it. The tool is general and is not shaped around these two sites. Read this document before you write code. The short work plan for Claude Code is <code>PLAN.md</code> at the repo root, next to <code>CLAUDE.md</code>. This PDF holds the same plan with reasons and diagrams.</p>
 {table(["Item", "Value"], [
- ["Date", "5 October 2026"],
- ["Status", "Draft for review. No code yet. No change to the client sites. The plan is the current direction and can change."],
+ ["Date", "5 October 2026. Revised 8 October 2026 (single page first)."],
+ ["Status", "Draft for review. Built: the safe fetcher, the MyPipit sitemap list, the tables tenants and sites, the API and the web app. Next: Phase 1, slice 2 (fetch one MyPipit blog post and extract its SEO content). No change to the client sites. The plan is the current direction and can change."],
  ["Repository", "<code>seo-advisor</code> (new repository). It reuses tested parts of the SEOAdvisor prototype."],
- ["Example sites", "Test cases, not targets: MyPipit (<code>marketplace.mypipit.com</code>, travel, English, 53 URLs) and extendmy.life (<code>extendmy.life</code>, longevity and health, English and German, about 474 URLs)"],
- ["Decisions so far", "Read-only access to the sites + Chrome extension. Gurzu SEO team reviews first, then the client approves. Pilot on MyPipit. Drafts in English and German, with native German review. Health-content review rule: decide before extendmy.life drafts start."],
+ ["Example sites", "Test cases, not targets: MyPipit (<code>marketplace.mypipit.com</code>, travel, English, 58 URLs on 7 October 2026) first, blog posts first. extendmy.life (<code>extendmy.life</code>, longevity and health, English and German, about 474 URLs) later."],
+ ["Decisions so far", "Single page first, then the whole site (8 Oct 2026). AI suggestions with DeepSeek. Read-only access to the sites. Gurzu SEO team reviews first, then the client approves. A person saves every change. Drafts in German need native review. Health-content review rule: decide before extendmy.life drafts start."],
  ["Evidence", "Google Search Central, Search Quality Rater Guidelines (11 Sep 2025), PostgreSQL, SQLite, DBOS, AWS and Microsoft architecture guidance, schema.org, web.dev, GOV.UK, RFC 9309, OWASP, NIST, DORA, GitHub, Anthropic. See sections 24 and 25."],
 ], ["22%", None])}
 <h2>How to read the diagrams</h2>
@@ -374,23 +363,23 @@ P.append(f"""<section class="page cover">
 
 P.append(page("1. Summary", f"""
 <h2>What we build</h2>
-<p>seo-advisor is one platform for many sites. For each site it keeps an inventory of all pages, audits them on a schedule, finds the work that has the most effect, writes improved drafts, sends each draft through human reviews, and measures the result in Search Console.</p>
+<p>seo-advisor is one platform for many sites. It starts with one page. A person gives the URL of a page on a registered site and a target keyword. The tool fetches that page, extracts its SEO content and audits it. Each finding shows its evidence and its source. Then an AI suggests fixes, and a person reviews each suggestion. Later the tool scales to the whole site: an inventory of all pages, scheduled audits, a work queue, and results measured in Search Console.</p>
 <h2>Main decisions</h2>
 {table(["Topic", "Decision", "Reason"], [
- ["Access to client sites", "Read-only. A Chrome extension fills the site editor; a person saves.", "No client code change needed. People stay in control."],
+ ["Scope", "Single page first. The person pastes a URL of a registered site and types a keyword. The sitemap list is only a page picker. The whole site comes in Phase 3.", "Owner decision (8 Oct 2026): do SEO on one page before the whole site."],
+ ["Access to client sites", "Read-only. A person copies approved text into the site editor and saves. An extension fills the editor in Phase 4.", "No client code change needed. People stay in control."],
+ ["AI provider", "DeepSeek writes suggestions. A person reviews each one.", "Owner decision (8 Oct 2026). The AI only writes text. Code counts and scores."],
  ["Database", "PostgreSQL 18 with pgvector", "Many writers at the same time (scheduler, workers, API). SQLite allows one writer (S20)."],
- ["Jobs and schedules", "DBOS on the same PostgreSQL", "Durable steps, cron per site, retries, no extra server (S22)."],
+ ["Jobs and schedules", "On request in Phase 1. DBOS on the same PostgreSQL from Phase 3.", "Durable steps, schedules per site, retries, no extra server (S22)."],
  ["Tenancy", "One shared schema with tenant_id and site_id on every row", "Lowest cost and effort. Add row-level security when outside customers arrive (S23, S24)."],
- ["Content history", "Immutable version rows + log of workflow events", "Full history of who changed what and why (S21)."],
- ["Crawling", "Plain HTTP (httpx) from the sitemaps; a browser only for checks", "Both sites send full content in the first HTML response (observed 5 Oct 2026)."],
+ ["Fetching", "Plain HTTP (httpx) through the safe fetcher, one page at a time. A full crawl in Phase 3.", "Both sites send full content in the first HTML response (observed 5 Oct 2026)."],
  ["Reviews", "Gurzu second-person review (2i), then client approval. Expert review for health and native review for German.", "Google: health content must be accurate and written or reviewed by an expert (S2, S3)."],
- ["Example sites", "MyPipit first, then extendmy.life, as test cases for a general tool", "Smaller site, one language, lower-risk topic first."],
  ["Tools and setup", "uv, pnpm, mise, Docker Compose, strict automatic checks, light process rules", "One setup command. New engineers can start fast (sections 15 to 19)."],
-], ["20%", "40%", "40%"])}
+], ["18%", "44%", "38%"])}
 <h2>How to begin</h2>
 <ol><li>Read this document and <code>PLAN.md</code>. Agree on the open questions in section 23.</li>
-<li>Set up the repository with the checklist in sections 16 to 18. Write the first decision records (ADRs).</li>
-<li>Build the data model and the site onboarding for MyPipit. Do not build AI drafts before the audit results are correct.</li></ol>
+<li>Setup steps 0.1 to 0.3 are done. The other setup steps start when a slice needs them (sections 16 to 18).</li>
+<li>Build the page loop for one MyPipit blog post: fetch and extract (slice 2), audit (slice 3), AI suggestions (slice 4). In each slice, build the backend first, then its screen. Do not build AI suggestions before the audit results are correct.</li></ol>
 <div class="warning">WARNING: Do not publish AI-written health content without an expert review. Google's rater guidelines rate an AI-written medical article made at scale as "Lowest: Scaled content abuse" (S1).</div>
 """))
 
@@ -409,38 +398,41 @@ P.append(page("How we work: research, experiment, implement", svg("method", "125
 P.append(page("2. The two sites today", table(
     ["Check", "MyPipit (marketplace.mypipit.com)", "extendmy.life"],
     [["Type", "Travel marketplace (treks, hotels, guides)", "Longevity and health marketplace (clinics, retreats, articles). YMYL topic (S1)."],
-     ["Size", "53 URLs: 17 listings, 36 blog posts", "About 474 URLs: 82 articles, 125 clinic pages, 3 categories, 11 subcategories, 13 groupings, 3 static pages, each in EN and DE"],
+     ["Size", "58 URLs on 7 October 2026: 30 blog posts, 17 listings, 11 other pages (53 URLs on 2 October)", "About 474 URLs: 82 articles, 125 clinic pages, 3 categories, 11 subcategories, 13 groupings, 3 static pages, each in EN and DE"],
      ["Technology", "Rails, server-rendered pages", "Next.js, server-rendered pages"],
      ["Languages", "English", "English and German with reciprocal hreflang (en, de, x-default) on inner pages"],
      ["Good base", "Canonical, meta description, Open Graph, sitemap, BlogPosting data", "Canonical, good titles on articles and clinics, alt text on images, robots.txt with sitemap"],
      ["Main issues", "Titles without the searched trek name; image links expire after 1 hour; 41 of 88 images without alt text; no robots.txt", "Same meta description on all category pages; subcategory pages repeat the parent H1; articles have empty author and no dates in structured data; all sitemap lastmod values are the build time; home page has no canonical or hreflang; x-default redirects (307)"],
-     ["Content editor", "Rails agency dashboard (Lexxy rich text)", "Not known yet (question in section 17)"],
-     ["Search Console", "MyPipit team has access", "Not confirmed"]],
-    ["14%", "40%", "46%"]), "Facts from the public pages, read with GET requests only, on 2 and 5 October 2026."))
+     ["Content editor", "Rails agency dashboard (Lexxy rich text)", "Not known yet (question in section 23)"],
+     ["Search Console", "MyPipit team has access", "Not confirmed"],
+     ["Order", "First. Blog posts first, one page at a time.", "Later (Phase 5)."]],
+    ["14%", "40%", "46%"]), "Facts from the public pages, read with GET requests only, on 2, 5 and 7 October 2026."))
 
 P.append(page("3. Requirements", table(
     ["ID", "Requirement", "Priority"],
-    [["FR-1", "Add a site: base URL, languages, YMYL flag, Search Console property, schedules.", "Must"],
-     ["FR-2", "Build and refresh a page inventory from sitemaps; group language versions (EN-DE).", "Must"],
-     ["FR-3", "Classify pages by type (listing, article, category, static) and apply rule sets per type and language.", "Must"],
-     ["FR-4", "Run audits daily, weekly and monthly per site; keep every run and its findings.", "Must"],
-     ["FR-5", "Show findings with evidence, severity and status (open, fixed, ignored); detect fixed and returning findings.", "Must"],
-     ["FR-6", "Import Search Console data (pages, queries, clicks, impressions, positions) every day.", "Must"],
-     ["FR-7", "Keep a keyword-to-page map: one primary keyword per page and language.", "Must"],
-     ["FR-8", "Rank work items by expected effect and effort; separate template fixes from single-page fixes.", "Must"],
-     ["FR-9", "Generate drafts for titles, descriptions, headings, body sections and alt text in EN and DE, with [ADD: ...] for unknown facts.", "Should"],
-     ["FR-10", "Run checks on every draft: no invented numbers or names, no copied text, language check, health rules.", "Must (with FR-9)"],
-     ["FR-11", "Move each content item through workflow states with roles; keep all versions and events.", "Must"],
-     ["FR-12", "Chrome extension: show suggestions in the site editor and fill fields when a person accepts. It never saves.", "Should"],
-     ["FR-13", "After a change goes live, verify it with a crawl and measure it in Search Console at 4, 8 and 12 weeks.", "Should"],
-     ["FR-14", "Weekly report per site and alerts (email or Emitii task).", "Should"],
+    [["FR-1", "Register a site: base URL, language, page-type rules.", "Must"],
+     ["FR-2", "A person gives one page URL and a target keyword. The tool accepts only URLs on a registered site.", "Must"],
+     ["FR-3", "Fetch that one page read-only through the safe fetcher (SSRF guard, robots.txt, rate limit). Keep a snapshot.", "Must"],
+     ["FR-4", "Extract the SEO content: title, meta description, canonical, meta robots, lang, H1 to H6, images and alt text, links and anchor text, Open Graph, structured data, main text and word count.", "Must"],
+     ["FR-5", "Audit the page with the rules for its page type (blog posts first). Each finding has severity, evidence (found, expected, where) and a source. A check that cannot see its data says \"unknown\", not pass.", "Must"],
+     ["FR-6", "Check the page again after a change. Compare with the last run: new, fixed and returning findings.", "Must"],
+     ["FR-7", "AI suggestions for the title, meta description, H1, alt text and content notes. Facts only from the page; other facts are [ADD: ...].", "Should (slice 4)"],
+     ["FR-8", "Checks on every suggestion: no invented numbers or names, no copied text.", "Must (with FR-7)"],
+     ["FR-9", "A person accepts, edits or rejects each suggestion and copies it into the site editor. The tool never publishes.", "Must (with FR-7)"],
+     ["FR-10", "Sitemap list as a page picker: read robots.txt and the sitemaps, show the URLs with their page type.", "Should"],
+     ["FR-11", "Page inventory of the whole site; crawler; audits daily, weekly and monthly per site.", "Later (Phase 3)"],
+     ["FR-12", "Search Console data every day; keyword-to-page map with one primary keyword per page and language; work queue ranked by effect and effort.", "Later (Phase 3)"],
+     ["FR-13", "Content items with workflow states, roles, versions and events.", "Later (Phase 3)"],
+     ["FR-14", "Chrome extension: show approved suggestions in the site editor and fill fields when a person accepts. It never saves.", "Later (Phase 4)"],
+     ["FR-15", "Language versions (EN-DE, hreflang groups) and health rules.", "Later (Phase 5)"],
+     ["FR-16", "Measure each change at 4, 8 and 12 weeks: per page first, then against unchanged pages of the same type. Weekly report and alerts.", "Later (Phase 6)"],
      ["NFR-1", "Read-only on client sites. Respect robots.txt (RFC 9309) and rate limits per host.", "Must"],
      ["NFR-2", "Every number shows its source and date. Every AI call is logged with model, prompt version and cost.", "Must"],
      ["NFR-3", "Multi-site and multi-tenant data model from day 1 (tenant_id, site_id on every row).", "Must"],
      ["NFR-4", "A failed source does not stop a run; the run records the gap.", "Must"],
      ["NFR-5", "Cost per site per month is tracked and capped.", "Should"],
      ["NFR-6", "Tests run without paid APIs (recorded data). CI on every pull request.", "Must"]],
-    ["9%", "77%", "14%"])))
+    ["9%", "73%", "18%"]), "FR-1 to FR-10 make the page loop of Phase 1. FR-11 to FR-16 come when the tool scales."))
 
 P.append(page("4. Users, roles and approvals", table(
     ["Role", "Who", "Can do", "Cannot do"],
@@ -450,18 +442,19 @@ P.append(page("4. Users, roles and approvals", table(
      ["Client approver", "MyPipit or extendmy.life team", "Final approval; apply and save in the site editor", "Change audit rules"],
      ["Viewer", "Anyone invited", "Read reports", "Edit"]],
     ["15%", "22%", "38%", "25%"]) + svg("states", "150mm"),
-    "Nobody approves their own work. Health (YMYL) and German content need an extra expert or native review."))
+    "Nobody approves their own work. In Phase 1 a person accepts, edits or rejects each suggestion. The full states below come with the content workflow (Phase 3). Health (YMYL) and German content need an extra expert or native review."))
 
 P.append(page("5. Architecture", svg("arch", "200mm") + """
-<div class="note">NOTE: One service (a modular monolith) is enough for 1 to 2 engineers. Each module has a clear interface, so a module can move to its own service later. The extension holds no logic and no keys; Chrome bans remotely hosted code (MyPipit evidence S17).</div>""",
-    "Layers: people → interfaces → one Python service with clear modules → PostgreSQL → read-only data sources."))
+<div class="note">NOTE: One service (a modular monolith) is enough for 1 to 2 engineers. Each module has a clear interface, so a module can move to its own service later. In Phase 1 the service works on one page at a time, on request. The dashed boxes come in later phases. The extension holds no logic and no keys; Chrome bans remotely hosted code (MyPipit evidence S17).</div>""",
+    "Layers: people → interfaces → one Python service with clear modules → PostgreSQL → read-only data sources. Dashed boxes come later."))
 
 P.append(page("5. Architecture (continued): code grouped by feature", svg("modules", "70mm") + """
 <pre style="font-size:7.6pt;line-height:1.3;background:#f3f5f8;border:1px solid #d5dce6;padding:6px 9px;margin:6px 0">apps/api/src/seo_advisor/
   core/           config, db session, ids (uuidv7), tenancy, logging, errors (RFC 9457)
   integrations/   external clients only: http_fetch (+ SSRF guard), search_console, crux, llm
   features/
-    sites/  inventory/  audits/  search_data/  content/  drafts/  reports/
+    sites/  inventory/  audits/  drafts/          (Phase 1: one page)
+    search_data/  content/  reports/            (later phases)
       api.py  service.py  schemas.py  models.py  repository.py  workflows.py  prompts/
   main.py         builds the app and mounts each feature router
 apps/api/tests/&lt;feature&gt;/          apps/web/src/features/&lt;feature&gt;/   (same features)</pre>""" + table(
@@ -474,9 +467,9 @@ apps/api/tests/&lt;feature&gt;/          apps/web/src/features/&lt;feature&gt;/ 
     ["55%", "45%"]),
     "The platform is one service (a modular monolith). The code is grouped by feature, not by type. All code for one feature is in one folder."))
 
-P.append(page("6. Data model", svg("datamodel", "205mm") + """
-<div class="note">NOTE: IDs use <code>uuidv7()</code> (PostgreSQL 18), so rows sort by time. Content versions and workflow events are never updated or deleted. A trigger-based audit log covers settings and permissions (S21).</div>""",
-    "Every table has tenant_id and site_id (not all shown). Crow-foot arrows mean one-to-many. Header colours: grey = tenancy, blue = inventory, green = content and workflow, red = audits, light blue = search data, purple = jobs and traces."))
+P.append(page("6. Data model", svg("datamodel", "175mm") + """
+<div class="note">NOTE: IDs use <code>uuidv7()</code> (PostgreSQL 18), so rows sort by time. In Phase 1 the table pages holds only the pages that a person analyses, not the whole sitemap. Each check of a page adds a snapshot and an audit run, so two runs can be compared. Suggestions and AI call logs are never deleted.</div>""",
+    "Every table has tenant_id and site_id (not all shown). Crow-foot arrows mean one-to-many. Header colours: grey = tenancy, blue = page and snapshot, red = audits, green = suggestions, purple = AI call log. The grey box lists the tables of later phases."))
 
 P.append(page("7. Database: options we compared", table(
     ["Option", "Benefit", "Drawback", "Decision"],
@@ -494,22 +487,22 @@ P.append(page("7. Database: options we compared", table(
     ["25%", "75%"]),
     "The platform has many writers at the same time. This decides the database."))
 
-P.append(page("8. Flow A: add a site (onboarding)", svg("onboard", "200mm"),
-    "A site goes live in the platform only after the SEO team checks the first audit."))
+P.append(page("8. Flow A: analyse one page", svg("onboard", "215mm"),
+    "The page loop of Phase 1. A person starts it for one page. Nothing runs on a schedule."))
 
-P.append(page("9. Flow B: scheduled audits", svg("schedule", "150mm") + table(
+P.append(page("9. Flow B: check the page again", svg("schedule", "120mm") + "<h2>Later (Phase 3): scheduled audits for the whole site</h2>" + table(
     ["Run", "What", "Why"],
     [["Daily", "robots.txt, sitemaps, status codes, new and removed URLs, Search Console sync", "Errors must show fast. Search Console data is 2 to 3 days late."],
      ["Weekly", "All rules on pages that changed and on a rotating sample", "Stable view without crawling everything every day."],
      ["Monthly", "Full audit, keyword map refresh, review dates, Core Web Vitals (CrUX API)", "Content and keywords change slowly. CrUX data covers 28 days."]],
     ["12%", "53%", "35%"]),
-    "Each run compares with the previous run, so the team sees what is new, fixed or back."))
+    "In Phase 1 a person asks for a new check after a change. Each check compares with the previous run, so the team sees what is new, fixed or back. Schedules come in Phase 3."))
 
-P.append(page("10. Flow C: improvement and content generation", svg("content", "220mm"),
-    "A finding becomes a work item. A template issue goes to the site developers. A page issue becomes a draft that passes checks and human reviews."))
+P.append(page("10. Flow C: from finding to fix", svg("content", "205mm"),
+    "A finding on the page becomes a suggestion. A template issue goes to the site developers. A page issue gets an AI suggestion that passes checks and a human review. A person copies it into the site editor and saves it."))
 
-P.append(page("11. Managing many content items", f"""
-<p>extendmy.life alone has about 474 URLs. The platform must manage this volume without a person opening every page. These are the rules.</p>
+P.append(page("11. Managing many content items (Phase 3: whole site)", f"""
+<p>This section is for Phase 3, when the tool scales to the whole site. Phase 1 works on one page at a time. extendmy.life alone has about 474 URLs. The platform must manage this volume without a person opening every page. These are the rules.</p>
 {table(["Rule", "How it works", "Example"], [
  ["One inventory", "Every page, field and language version is a row. Nothing is edited outside the platform.", "The German and English versions of one article share one hreflang group."],
  ["Page types and templates", "Rules run per page type. A finding on many pages of one type is a template fix, not 100 single fixes.", "One meta description on all 17 category pages → one request to the developers."],
@@ -523,26 +516,33 @@ P.append(page("11. Managing many content items", f"""
 <div class="caution">CAUTION: Do not generate many pages from one template without real added value. Google lists this as scaled content abuse (MyPipit evidence S12).</div>
 """))
 
-P.append(page("12. Audit rules (first set)", '<div class="small">' + table(
+P.append(page("12. Audit rules", '<h2>Phase 1: first rules for a blog post</h2><div class="small">' + table(
+    ["Area", "Rule", "Source"],
+    [["Title", "Present; fits about 600 pixels (rule of thumb; reuse the SEOAdvisor pixel check); the target keyword is in the title", "R3 §1"],
+     ["Meta description", "Present and unique; 120 to 156 characters is a rule of thumb, not a Google rule", "R3 §2, §11"],
+     ["Headings", "Exactly one H1; the keyword is in the H1; heading levels in order", "Practice"],
+     ["Images", "Alt text present, descriptive and not stuffed; image URLs are stable (MyPipit image links expire after 1 hour)", "R3 §3.1, §3.2"],
+     ["Social image", "og:image present, at least 1200 x 630 pixels", "R3 §3.3"],
+     ["Indexing", "Canonical present and self-referencing; no noindex", "R3 §7"],
+     ["Structured data", "BlogPosting with author, datePublished, dateModified, headline and image", "R3 §5.11"],
+     ["Links", "Internal links are &lt;a href&gt; links with descriptive anchor text", "R3 §13.1"],
+     ["Slug", "Readable words with hyphens, no IDs", "R3 §8.1"],
+     ["Page", "lang attribute present; word count shown as information only (Google has no preferred word count)", "R3 §6.4"]],
+    ["16%", "64%", "20%"]) + '</div><h2>Later: rules for the whole site, other page types and other sites</h2><div class="small">' + table(
     ["Group", "Rule", "Source"],
     [["Technical", "HTTP status 200; no redirect chains; HTML under 2 MB (Googlebot reads the first 2 MB)", "Google (S9)"],
      ["Technical", "robots.txt valid; Sitemap line present; parameter rules block all positions of filter parameters", "RFC 9309 (S10), Google faceted navigation (S8)"],
      ["Technical", "Sitemap lastmod changes only when the page content changes", "Google (S7), Bing (S11)"],
-     ["Technical", "Canonical present and self-referencing on indexable pages, also on the home page", "Google"],
      ["Language", "hreflang links reciprocal, full URLs, same-language canonical, x-default to a real page", "Google (S5)"],
      ["Language", "Visible text is in the declared language; German text reviewed by a native speaker", "Google (S5)"],
-     ["On-page", "Title unique, descriptive, primary keyword first, fits about 600 pixels", "Google"],
-     ["On-page", "Meta description unique per page (no shared category text)", "Google"],
-     ["On-page", "One H1 that matches the page (subcategory H1 is not the parent name)", "Practice"],
-     ["On-page", "Every content image has short, descriptive alt text; image URLs are stable", "Google"],
-     ["Structured data", "Article/BlogPosting with real author and dates, or leave them out; never empty values", "Google (S4)"],
+     ["On-page", "Meta description unique across the site (no shared category text)", "Google"],
      ["Structured data", "Clinic pages: MedicalClinic (a LocalBusiness type) with name and address; no self-serving review stars", "schema.org, Google (S4)"],
      ["Health (YMYL)", "Named author or reviewer with real credentials; visible last reviewed date; no invented experts", "Google (S2, S3)"],
      ["Content", "Covers the basics for its page type; answers the main user questions; no keyword stuffing", "Google helpful content (S2)"],
      ["Freshness", "Review date not passed; dates change only with major changes", "Google (S2), GOV.UK (S16)"],
      ["Speed", "LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1 at the 75th percentile (when CrUX has data)", "web.dev (S12)"]],
     ["14%", "61%", "25%"]) + "</div>",
-    "Each rule records its source. A rule that is only common practice says so. The rule set grows after the pilot."))
+    "Each rule records its source. A rule that is only common practice or a rule of thumb says so. R3 is the MyPipit research file (requirements/research/03-mypipit-evidence.md)."))
 
 P.append(page("13. Content generation rules", table(
     ["Rule", "Detail"],
@@ -584,39 +584,55 @@ P.append(page("15. Technology stack", table(
      ["Python", "Python 3.14.8, uv 0.12 (lock file uv.lock). Package name seo_advisor (not seo_engine, which SEOAdvisor uses).", "3.15 is new and DBOS, FastAPI and Pydantic do not support it yet (S26). uv replaces pip, venv and pip-tools (S25)."],
      ["API", "FastAPI 0.142, Pydantic 2.13, pydantic-settings 2.15", "Typed inputs and outputs. OpenAPI generates the TypeScript client."],
      ["Database", "PostgreSQL 18 + pgvector 0.8.7, SQLAlchemy 2.1 (sync), psycopg 3, Alembic 1.20", "Sync code is simpler for new engineers and fits DBOS (S39)."],
-     ["Jobs", "DBOS 3.2 on the same PostgreSQL", "Durable steps and schedules without a second server (S22)."],
+     ["Jobs", "DBOS 3.2 on the same PostgreSQL, from Phase 3. Phase 1 runs on request.", "Durable steps and schedules without a second server (S22)."],
      ["Quality (Python)", "ruff 0.16 (lint and format), mypy 2.4 --strict, pytest 9.1 strict, testcontainers 4.15", "One type checker as the gate. Tests use a real database (S27, S28)."],
-     ["Web app", "React 19.3, TypeScript 6.0.3, Vite 8.3, pnpm 12, TanStack Router, Query and Table, Tailwind CSS + shadcn/ui, oxlint + Prettier, Vitest 5. React Hook Form + Zod from Phase 2. Recharts from Phase 5", "TypeScript 7 has no tool API until 7.1. The Vite template uses oxlint (S29)."],
+     ["Web app", "React 19.3, TypeScript 6.0.3, Vite 8.3, pnpm 12, TanStack Router, Query and Table, Tailwind CSS + shadcn/ui, oxlint + Prettier, Vitest 5. React Hook Form + Zod when the first real form needs them. Recharts from Phase 6", "TypeScript 7 has no tool API until 7.1. The Vite template uses oxlint (S29)."],
      ["API client", "openapi-typescript 7.13 + openapi-fetch 0.17", "Small and stable. CI fails if the client is out of date."],
      ["Extension", "WXT 0.21 (Manifest V3)", "Less custom build code. Shares Vite, React and TypeScript with the web app (S30)."],
      ["Logs and traces", "structlog 26.1, OpenTelemetry 1.45 (later step)", "Logs with request ID from day 1 (S38)."],
-     ["AI", "DeepSeek writer + a checker from another model family", "Prompts as versioned files. Every call logged with cost (S41)."],
+     ["AI", "DeepSeek writes suggestions (owner decision, 8 Oct 2026). A checker from another model family later.", "Prompts as versioned files. Every call logged with cost (S41)."],
+     ["Docs", "playwright 1.63 (Python) and @hpcc-js/wasm-graphviz 1.29 (npm), docs only", "<code>mise run docs:pdf</code> builds this PDF with the installed Google Chrome."],
      ["Git and CI", "GitHub Actions, Dependabot, gitleaks, prek hooks", "Free tools. Paid GitHub security later (S33)."],
      ["Deployment", "Later, with DevOps", "Not in this plan."]],
     ["15%", "45%", "40%"]) + """<h2>All pinned versions (6 October 2026)</h2>
 <p class="src">Python 3.14.8 · uv 0.12.23 · ruff 0.16.10 · mypy 2.4.0 · pytest 9.1.1 · testcontainers 4.15.0 · FastAPI 0.142.2 · Pydantic 2.13.5 · pydantic-settings 2.15.0 · SQLAlchemy 2.1.3 · psycopg 3.3.6 · Alembic 1.20.0 · DBOS 3.2.0 · structlog 26.1.0 · pytest-recording 0.14.0 · Node 24 LTS (Node 26 LTS from 28 October 2026) · pnpm 12.9 · Vite 8.3.3 · React 19.3.0 · TypeScript 6.0.3 · oxlint 1.87.0 · Prettier 3.9.9 · Vitest 5.0.3 · Playwright 1.63.0 · WXT 0.21.4 · openapi-typescript 7.13.0 · openapi-fetch 0.17.0 · mise 2026.10.3 · prek 0.5.5 · gitleaks 8.30.1 · pip-audit 2.10.1 · Docker image pgvector/pgvector:0.8.7-pg18-trixie · import-linter 2.15</p>""",
     "The versions are the current versions on 6 October 2026. Check them again on the day of the setup."))
 
-P.append(page("16. Set up the repo before implementation", svg("setup", "150mm") + table(
+P.append(page("16. Set up the repo", svg("setup", "150mm") + table(
     ["Principle", "What it means"],
-    [["One command to start", "A new engineer runs <code>mise run setup</code> and then <code>mise run check</code>. Nothing else is necessary."],
+    [["One command to start", "A new engineer runs <code>mise run setup</code> and then <code>mise run check</code> (or <code>make check</code>). Nothing else is necessary."],
      ["Automatic checks, light process", "Lint, format, types and tests run by themselves. Hooks only fix files or block secrets. Process rules stay few, so new engineers can work fast."],
-     ["Decisions in writing", "8 to 10 decision records (ADRs) before feature code. People and AI tools read the reason for each choice (S35)."],
+     ["Decisions in writing", "A decision record (ADR) for each main choice. People and AI tools read the reason for each choice (S35)."],
      ["Same environment for all", "mise pins the tools. Docker Compose runs the database. Lock files fix every package version."],
-     ["Safe by default", "No secrets in git. Actions pinned to commit IDs. The crawler blocks internal addresses (S33, S37)."]],
+     ["Safe by default", "No secrets in git. Actions pinned to commit IDs. The fetcher blocks internal addresses (S33, S37)."]],
     ["28%", "72%"]),
-    "Setup takes about 1 to 1.5 weeks for one engineer. Feature work starts only after the final check passes."))
+    "Steps 0.1 to 0.3 came first. Since 7 October 2026 the other steps start when a slice needs them, so feature work and setup go together."))
+
+P.append(page("16. Set up the repo (continued): when each step starts", table(
+    ["Step", "Starts with"],
+    [["0.1 to 0.3", "Done."],
+     ["0.4 Database", "Slice 2. Only the tables that each slice needs: tenants, sites (done); pages, page_snapshots (slice 2); audit_runs, findings (slice 3); suggestions, llm_calls (slice 4)."],
+     ["0.5 API", "Started 8 Oct 2026 with the web app; structlog is still open."],
+     ["0.6 Web app", "Started 8 Oct 2026: each slice now ends with its screen. The extension starts in Phase 4."],
+     ["0.7 Hooks, 0.8 CI", "Before the first pull request into dev, or when the owner decides."],
+     ["0.9 Claude Code settings", "When the owner decides. Recommended soon: deny reads of .env."],
+     ["0.10 ADRs", "Write each ADR when its decision is made or first used."],
+     ["0.11 SSRF guard", "Slice 1 (the first outbound fetch). Done."],
+     ["0.11 AI layer, evals", "Slice 4 (AI suggestions, DeepSeek)."],
+     ["0.12 Final check", "Before a second person joins."]],
+    ["28%", "72%"]),
+    "Feature-first (7 Oct 2026): each setup step starts when a slice needs it. Sections 17 and 18 give the full task and the \"done when\" of each step."))
 
 P.append(page("17. Setup checklist, part 1", table(
     ["Step", "What to set up", "Done when"],
-    [["0.1 Machine", "Install mise, Docker, the GitHub CLI and Claude Code. Set the git identity raksha-gurzu. Push through the github.com-gurzu SSH alias.", "The three tools report their versions and gh is logged in."],
-     ["0.2 Repo skeleton", "Folders apps/api (with core, integrations and empty feature folders), apps/web, apps/extension, packages/api-client, docs (with decisions, architecture, design and notes), evals, experiments, infra, .github. Copy this requirements folder into the repo. README with a 5-minute setup, .gitignore, .editorconfig, .env.example with fake values, a proprietary NOTICE. mise.toml with tool versions and tasks (setup, dev, test, lint, typecheck, check, audit, db:up, db:migrate, db:seed, gen-client, evals, docs:pdf). The docs:pdf task rebuilds this PDF.", "A new person follows the README and <code>mise run setup</code> works on a fresh clone."],
-     ["0.3 Python base", "pyproject.toml, uv.lock, dependency groups (dev, test, lint), a 7-day delay for new package releases (exclude-newer), src layout. ruff rules E F W I UP B SIM S ASYNC PT RUF DTZ N. mypy --strict with the Pydantic plugin. pytest strict mode and markers (unit, integration, e2e, live). import-linter protected and forbidden contracts for the feature rules. (Do not use the independence contract. It also blocks the allowed calls through service.py.) A vulnerability check task (<code>mise run audit</code>, pip-audit). A Settings class that reads all configuration from the environment and stops at start if a key is missing.", "<code>mise run check</code> passes. A forbidden import between features fails the check. A missing key stops start-up with a clear message."],
-     ["0.4 Database base", "Docker Compose with the pgvector image. Mount the volume at /var/lib/postgresql (PostgreSQL 18 changed this path, S32). SQLAlchemy base with the Alembic naming convention. First migration: vector extension, uuidv7() keys, timestamps with time zone, first tables. Test fixtures: testcontainers starts one test database for each session, rollback after each test, DBOS reset. Seed script with 2 fake sites.", "Upgrade and <code>alembic check</code> pass on an empty database. An integration test passes twice in a row."],
-     ["0.5 API base", "FastAPI under /api/v1 with a health route. An error handler for RFC 9457 problem details (FastAPI has none, S40). Request ID middleware. structlog. An operation ID on each route. A task that exports openapi.json and generates the TypeScript client.", "An error returns application/problem+json with the request ID. The web app calls /health through the generated client."],
-     ["0.6 Web and extension base", "Vite react-ts template with strict TypeScript flags, oxlint, Prettier, Vitest, Testing Library and MSW. TanStack Router, Query and Table. Tailwind CSS and shadcn/ui, with the components in src/shared/ui. Folders app, routes, features and shared, as in CLAUDE.md. Check the version, licence and advisories of each library that R4 does not cover. Keep the pnpm release delay. Allow no install scripts until a package needs one. WXT extension skeleton with minimal permissions and no remote code.", "Lint, type check, tests and build pass. The extension loads in Chromium and calls /health."]],
+    [["0.1 Machine <span class='tag g'>Done</span>", "Install mise, Docker, the GitHub CLI and Claude Code. Set the git identity raksha-gurzu. Push through the github.com-gurzu SSH alias.", "The three tools report their versions and gh is logged in."],
+     ["0.2 Repo skeleton <span class='tag g'>Done</span>", "Folders apps/api (with core, integrations and empty feature folders), apps/web, apps/extension, packages/api-client, docs (with decisions, architecture, design and notes), evals, experiments, infra, .github. Copy this requirements folder into the repo. README with a 5-minute setup, .gitignore, .editorconfig, .env.example with fake values, a proprietary NOTICE. mise.toml with tool versions and tasks (setup, dev, test, lint, typecheck, check, audit, db:up, db:migrate, db:seed, gen-client, evals, docs:pdf). The docs:pdf task rebuilds this PDF.", "A new person follows the README and <code>mise run setup</code> works on a fresh clone."],
+     ["0.3 Python base <span class='tag g'>Done</span>", "pyproject.toml, uv.lock, dependency groups (dev, test, lint), a 7-day delay for new package releases (exclude-newer), src layout. ruff rules E F W I UP B SIM S ASYNC PT RUF DTZ N. mypy --strict with the Pydantic plugin. pytest strict mode and markers (unit, integration, e2e, live). import-linter protected and forbidden contracts for the feature rules. (Do not use the independence contract. It also blocks the allowed calls through service.py.) A vulnerability check task (<code>mise run audit</code>, pip-audit). A Settings class that reads all configuration from the environment and stops at start if a key is missing.", "<code>mise run check</code> passes. A forbidden import between features fails the check. A missing key stops start-up with a clear message."],
+     ["0.4 Database base <span class='tag i'>Started</span>", "Docker Compose with the pgvector image. Mount the volume at /var/lib/postgresql (PostgreSQL 18 changed this path, S32). SQLAlchemy base with the Alembic naming convention. First migration: vector extension, uuidv7() keys, timestamps with time zone, first tables. Test fixtures: testcontainers starts one test database for each session, rollback after each test, DBOS reset. Seed script with 2 fake sites.", "Upgrade and <code>alembic check</code> pass on an empty database. An integration test passes twice in a row."],
+     ["0.5 API base <span class='tag i'>Started</span>", "FastAPI under /api/v1 with a health route. An error handler for RFC 9457 problem details (FastAPI has none, S40). Request ID middleware. structlog. An operation ID on each route. A task that exports openapi.json and generates the TypeScript client.", "An error returns application/problem+json with the request ID. The web app calls /health through the generated client."],
+     ["0.6 Web and extension base <span class='tag g'>Web done</span>", "Vite react-ts template with strict TypeScript flags, oxlint, Prettier, Vitest, Testing Library and MSW. TanStack Router, Query and Table. Tailwind CSS and shadcn/ui, with the components in src/shared/ui. Folders app, routes, features and shared, as in CLAUDE.md. Check the version, licence and advisories of each library that R4 does not cover. Keep the pnpm release delay. Allow no install scripts until a package needs one. WXT extension skeleton with minimal permissions and no remote code.", "Lint, type check, tests and build pass. The extension loads in Chromium and calls /health."]],
     ["14%", "56%", "30%"]),
-    "The detail and the sources for each step are in research file R4 (requirements/research/04-project-setup.md)."))
+    "The detail and the sources for each step are in research file R4 (requirements/research/04-project-setup.md). Section 16 says when each step starts."))
 
 P.append(page("18. Setup checklist, part 2", table(
     ["Step", "What to set up", "Done when"],
@@ -624,7 +640,7 @@ P.append(page("18. Setup checklist, part 2", table(
      ["0.8 CI and GitHub", "One CI workflow. Pin actions to commit IDs and turn on the GitHub policy that requires pinned actions. Read-only token by default. Jobs: lint, types, tests, migrations, OpenAPI drift, web, extension, gitleaks, and one required job. Ruleset on main: pull request, required check, squash merge only, linear history, no force push. 0 approvals while one engineer works, 1 approval when a second engineer joins. Check the pull request title for Conventional Commits. Dependabot each week for uv, pnpm, actions and Docker. A pull request template with an AI-assisted line.", "A failing test blocks the merge. A direct push to main is refused. The first Dependabot pull request passes CI."],
      ["0.9 Claude Code", "CLAUDE.md is at the repo root (under 200 lines). .claude/settings.json: deny reads of .env files, keys, lock files, build output, node_modules, the generated client and PDFs, deny force push, allow the project commands, a format hook after edits, fast tests when Claude stops, sandbox on. Skills: new-endpoint, new-migration, run-evals. A security-reviewer subagent.", "Claude cannot read .env. Claude runs <code>mise run check</code> from CLAUDE.md alone."],
      ["0.10 Decisions and diagrams", "8 to 10 ADRs in MADR 4.0 format (layout, Python and uv, PostgreSQL and pgvector, DBOS, sync SQLAlchemy, code-first OpenAPI, AI providers, read-only rule, WXT, logging). C4 level 1 and 2 diagrams. A design document template.", "Each ADR has context, options, decision and consequences."],
-     ["0.11 Security and AI base", "SSRF guard with tests for each blocked address range and for DNS rebinding (reuse from SEOAdvisor). AI layer: provider interface, model and price settings, llm_calls table, prompts as versioned files, recorded test fixtures with keys removed, cost limits per run and per day. One key for each person, and a spend limit at each provider. evals folder with 20 first cases and code-based graders.", "Guard tests pass before crawler code exists. A recorded AI call replays in CI with no network. <code>mise run evals</code> shows a score table."],
+     ["0.11 Security and AI base <span class='tag g'>Guard done</span>", "SSRF guard with tests for each blocked address range and for DNS rebinding (reuse from SEOAdvisor). AI layer at slice 4 (DeepSeek; reuse SEOAdvisor providers/llm.py): provider interface, model and price settings, llm_calls table, prompts as versioned files, recorded test fixtures with keys removed, cost limits per run and per day. One key for each person, and a spend limit at each provider. evals folder with 20 first cases and code-based graders.", "Guard tests pass before crawler code exists. A recorded AI call replays in CI with no network. <code>mise run evals</code> shows a score table."],
      ["0.12 Final check", "Fresh clone, setup, check, CI, secret block and push block, all from the README only.", "A second person or a new Claude session completes it in 15 minutes or less."]],
     ["15%", "55%", "30%"]) + """
 <h2>Should do in weeks 2 to 4</h2>
@@ -634,7 +650,7 @@ P.append(page("18. Setup checklist, part 2", table(
 P.append(page("19. Working with Claude Code", table(
     ["Topic", "Rule"],
     [["CLAUDE.md", "CLAUDE.md and PLAN.md are at the repo root, not in the requirements folder. Keep it under 200 lines. Put in it the commands, the rules that differ from defaults and links to ADRs and PLAN.md. Do not copy long documents into it. Anthropic says that a long file makes Claude ignore instructions (S42)."],
-     ["Context and tokens", "Load only the current phase of PLAN.md. Do one task in each session and clear the context between tasks. Read only the research section that a task names. Use a subagent for wide searches. Do not load the PDF."],
+     ["Context and tokens", "Load only the current step of PLAN.md. Do one task in each session and clear the context between tasks. Read only the research section that a task names. Use a subagent for wide searches. Do not load the PDF."],
      ["Plan first", "Use plan mode for work that touches many files or is not clear. For a large feature, let Claude ask questions and write a short design document first."],
      ["Proof, not claims", "Give Claude a check that it can run: tests, type check, build. Ask for the command and its output. A hook runs fast tests when Claude stops."],
      ["Tests first", "Write a failing test, confirm that it fails, then write the code (S41)."],
@@ -656,43 +672,43 @@ P.append(page("19. Working with Claude Code", table(
 
 P.append(page("20. Order of work", svg("roadmap", "150mm") + table(
     ["Phase", "Done when", "Estimate"],
-    [["0. Set up the repo", "Final setup check passes from the README only (section 18, step 0.12).", "1 to 1.5 weeks"],
-     ["1. Inventory and audit (test site MyPipit)", "MyPipit inventory matches its sitemap. Scheduled runs work for 2 weeks. 90 percent or more of findings are correct.", "2 to 3 weeks"],
-     ["2. Content workflow", "Items, versions, states, roles and reviews work for 10 pages. Nobody approves their own item.", "2 weeks"],
-     ["3. AI drafts and extension", "Drafts pass all checks on 10 pages. The extension fills the MyPipit form. 7 of 10 drafts approved with small edits.", "2 to 3 weeks"],
-     ["4. Second site and languages (extendmy.life)", "English and German inventory with language groups. Health rule and native review enforced in code.", "2 to 3 weeks"],
-     ["5. Measure and report", "Outcomes at 4, 8 and 12 weeks. Weekly report for each site.", "1 to 2 weeks"]],
-    ["22%", "60%", "18%"]),
-    "The phases are the current direction and can change. Each phase is built in small parts (see How we work). Each phase ends with a check. If the check fails, fix the rules or prompts before the next phase. Estimates are for one engineer."))
+    [["0. Set up the repo", "Steps 0.1 to 0.3 done. The other steps start when a slice needs them. The final check passes before a second person joins (step 0.12).", "1 to 1.5 weeks in total"],
+     ["1. One page, end to end (MyPipit blog post)", "Slices 1 to 5 are done. 90 percent or more of findings are correct. 7 of 10 suggestions are accepted with small edits.", "2 to 3 weeks"],
+     ["2. More page types on MyPipit", "Listings, blog categories and static pages have rule sets with sources. The page type also comes from the content.", "1 to 2 weeks"],
+     ["3. Whole site", "A full crawl is stored. Schedules run for 2 weeks without a manual start. Duplicate keywords are blocked. The work queue shows the top 10 with reasons.", "2 to 3 weeks"],
+     ["4. Extension", "A person applies and saves one approved suggestion. An item is Live only after the check confirms it.", "1 to 2 weeks"],
+     ["5. Second site and languages (extendmy.life)", "English and German pages match the 12 sitemaps. The health rule and native review are enforced in code.", "2 to 3 weeks"],
+     ["6. Measure and report", "Outcomes at 4, 8 and 12 weeks. A weekly report for each site owner.", "1 to 2 weeks"]],
+    ["24%", "58%", "18%"]),
+    "The phases are the current direction and can change. Each phase is built in small slices (see How we work). In each slice, build and check the backend first, then its screen. Each phase ends with a check. If the check fails, fix the rules or prompts before the next phase. Estimates are for one engineer."))
 
 P.append(page("21. Tasks, phases 1 to 3", table(
     ["Phase", "Task", "Done when"],
-    [["1", "Onboarding (test site MyPipit): robots.txt, sitemap index, inventory, page types", "The inventory has the same URLs as the sitemap."],
-     ["1", "Crawler: httpx, robots.txt rules, rate limit for each host, snapshots", "A full MyPipit crawl is stored."],
-     ["1", "Rule engine: rules for each page type and language, each with a source", "Each finding has evidence."],
-     ["1", "DBOS schedules (daily, weekly, monthly) and comparison with the last run", "Runs work for 2 weeks without a manual start."],
-     ["1", "Search Console sync", "16 months are stored and new days are added each day."],
-     ["1", "Findings view in the web app", "The SEO team reviews findings there."],
-     ["1", "Check", "90 percent or more of findings are correct."],
-     ["2", "Content items, immutable versions, state events, reviews", "Each change has a version and an event."],
-     ["2", "Workflow states and roles", "Nobody approves their own item. Each transition has a test."],
-     ["2", "Work queue: impact × confidence ÷ effort, template fixes apart from page fixes, batches of 5 to 10", "The queue shows the top 10 items with reasons."],
-     ["2", "Keyword-to-page map: one primary keyword for each page and language", "The platform blocks duplicates."],
-     ["3", "Draft service: facts only from the page, [ADD: ...] for other facts, versioned prompts", "10 drafts exist and each AI call is logged."],
-     ["3", "Checks: no invented numbers or names, no copied 8-word runs, second-model check", "No invented fact reaches review."],
-     ["3", "Extension for the test site editor: show, fill on Accept, never save", "A person applies one approved draft and saves it."],
-     ["3", "Verify after publish with a crawl", "An item becomes Live only after the crawl confirms it."],
-     ["3", "Check", "7 of 10 drafts are approved with small edits."]],
-    ["8%", "52%", "40%"])))
+    [["1", "Slice 1: safe fetcher (SSRF guard, robots.txt, rate limit for each host; reused from SEOAdvisor), sitemap reader, page type and language for each URL. The sitemap list is now the page picker.", "Done. The MyPipit URL list is the same as its sitemap URLs."],
+     ["1", "Slice 2a: database base, tables tenants and sites, <code>make seed</code>", "Done."],
+     ["1", "Web app and API for slice 1: sites, sitemap list, request trace, page-type rules and URL tester, <code>make dev</code>", "Done. The screens change in slice 2."],
+     ["1", "<s>Slice 2b: save all sitemap pages</s>", "Removed (8 Oct 2026): only analysed pages are saved."],
+     ["1", "Slice 2: fetch and extract one page. Spike with 1 MyPipit blog post. inventory.fetch_page (the URL must be on a registered site), tables pages and page_snapshots, the extractor. Screen: analyse a page (paste a URL or pick one from the sitemap list).", "The extracted fields of the fixture page are correct in tests. The screen shows them for a live MyPipit post."],
+     ["1", "Slice 3: audit one page. Rules for blog posts with sources, severity and evidence; tables audit_runs and findings; the keyword is part of the run. Screen: findings, filter by severity, check again.", "Each finding has evidence and a source. Two runs of the same page can be compared."],
+     ["1", "Slice 4: AI suggestions. AI layer with DeepSeek (step 0.11); drafts: suggestions with [ADD: ...], Pydantic check, one retry; tables suggestions and llm_calls; checks for invented facts and copied text. Screen: accept, edit or reject; copy.", "Every AI call is logged. No invented fact reaches review."],
+     ["1", "Slice 5: the loop on 5 MyPipit blog posts with the SEO team", "90 percent or more of findings are correct. 7 of 10 suggestions are accepted with small edits."],
+     ["2", "Rules for listings (travel structured data), blog categories and static pages", "Each type has its rule set with sources."],
+     ["2", "Page type from the content (title, structured data), not only the URL", "The fixture pages get the correct type."],
+     ["3", "Inventory of all sitemap pages; crawler with robots.txt rules, rate limit for each host and snapshots", "A full crawl is stored."],
+     ["3", "DBOS schedules (daily, weekly, monthly) and comparison with the last run", "Runs work for 2 weeks without a manual start."],
+     ["3", "Search Console sync, keyword-to-page map with one primary keyword for each page and language, cannibalisation check", "The platform blocks duplicates."],
+     ["3", "Content items, versions, states and roles; work queue: impact × confidence ÷ effort", "The queue shows the top 10 items with reasons."]],
+    ["8%", "57%", "35%"])))
 
-P.append(page("22. Tasks, phases 4 and 5, later work and change log", table(
+P.append(page("22. Tasks, phases 4 to 6, and later work", table(
     ["Phase", "Task", "Done when"],
-    [["4", "Second site and languages (test site extendmy.life): English and German inventory, language groups, page types", "The inventory matches the 12 sitemaps."],
-     ["4", "Language rules (hreflang, x-default, canonical, declared language)", "The home page issues and the x-default redirect show as findings."],
-     ["4", "Health rules (author, reviewer, review date, no empty structured data)", "Articles with an empty author show as findings."],
-     ["4", "German drafts need native review. The health rule is in code.", "Nobody can skip either step."],
-     ["5", "Outcomes at 4, 8 and 12 weeks compared with unchanged pages of the same type", "The report shows outcomes for each change older than 4 weeks."],
-     ["5", "Weekly report and alerts (email or Emitii)", "Each site owner gets one report each week."]],
+    [["4", "Extension for the test site editor: show approved suggestions, fill on Accept, never save", "A person applies and saves one approved suggestion."],
+     ["4", "Verify after publish: fetch the page again", "An item becomes Live only after the check confirms it."],
+     ["5", "Second site and languages (test site extendmy.life): English and German pages, hreflang groups, page types", "The pages match the 12 sitemaps."],
+     ["5", "Language rules (R2 §3) and health rules (R2 §1 and §2)", "The known issues show as findings."],
+     ["5", "German text needs native review. The health rule is in code.", "Nobody can skip either step."],
+     ["6", "Outcomes at 4, 8 and 12 weeks: per page first, then compared with unchanged pages of the same type (needs Phase 3)", "The report shows outcomes for each change older than 4 weeks."],
+     ["6", "Weekly report and alerts (email or Emitii)", "Each site owner gets one report each week."]],
     ["8%", "52%", "40%"]) + table(
     ["Later (needs a decision first)", "Note"],
     [["Deployment", "With DevOps: hosting, backups, login in front of the app."],
@@ -702,32 +718,38 @@ P.append(page("22. Tasks, phases 4 and 5, later work and change log", table(
      ["GitHub Secret Protection and CodeQL", "When the budget allows."],
      ["Sentry, SBOM, release automation", "With deployment."],
      ["TypeScript 7, Python 3.15", "After the tools support them."]],
-    ["40%", "60%"]) + "<h2>Change log</h2>" + table(
+    ["40%", "60%"])))
+
+P.append(page("22. Change log", '<div class="small">' + table(
     ["Date", "Change", "Reason"],
     [["5 Oct 2026", "Plan created: phases 0 to 5, PostgreSQL, DBOS, read-only access with an extension", "Requirements research (R1 to R3)"],
      ["6 Oct 2026", "Setup phase added: uv, pnpm, mise, strict checks, light process rules", "Setup research (R4). Easy start for new engineers"],
      ["6 Oct 2026", "General tool. Small parts. Research, experiment, implement", "Owner decision"],
      ["6 Oct 2026", "Modular monolith grouped by feature. Security rules in CLAUDE.md", "Owner decision"],
-     ["6 Oct 2026", "Review: repeated content removed. Session habits for people moved from CLAUDE.md to plan.md", "Keep both files small"],
+     ["6 Oct 2026", "Review: repeated content removed. Session habits for people moved from CLAUDE.md to PLAN.md", "Keep both files small"],
      ["6 Oct 2026", "CLAUDE.md kept as CLAUDE.template.md until it is copied. The PDF is rebuilt with every plan change. import-linter uses protected and forbidden contracts", "Owner decision. Contract check"],
      ["6 Oct 2026", "PLAN.md and CLAUDE.md stay at the repo root. There is no CLAUDE.template.md", "Owner decision"],
      ["7 Oct 2026", "Frontend: TanStack Router and Table, Tailwind CSS and shadcn/ui. React Hook Form and Zod in Phase 2. Recharts in Phase 5. Web folder layout", "Owner decision"],
      ["7 Oct 2026", ".gitattributes and folder READMEs added to step 0.2. CONTRIBUTING.md and SECURITY.md moved from Should to step 0.2. A db:down task added", "Owner decision"],
      ["7 Oct 2026", "Step 0.3: protected import contracts are added for each feature. pip-audit checks uv.lock. The pnpm checks join mise run check in step 0.6. The 7-day delay gives ruff 0.16.9 and mypy 2.3.1", "One wildcard contract cannot limit a feature to its own internals. Owner decision"],
-     ["7 Oct 2026", "Feature-first: Phase 1 in 5 slices. Steps 0.4 to 0.12 start when a slice needs them. Empty placeholder folders removed", "Owner decision: see a real feature first"]],
-    ["14%", "56%", "30%"]),
+     ["7 Oct 2026", "Feature-first: Phase 1 in 5 slices. Steps 0.4 to 0.12 start when a slice needs them. Empty placeholder folders removed", "Owner decision: see a real feature first"],
+     ["8 Oct 2026", "Backend and frontend in parallel: every slice ends with its screen. API (step 0.5, without structlog) and web app (step 0.6) started early. make wraps the mise tasks. The fetcher records each request for the Activity screen. jsdom added for web tests. TypeScript 6.0.3 (openapi-typescript needs the TypeScript API)", "Owner decision: see what each feature does"],
+     ["8 Oct 2026", "Single page first: Phase 1 is one MyPipit blog post end to end (fetch, extract, audit with evidence, DeepSeek suggestions, review). The sitemap list is a page picker. The whole site moves to Phase 3, the extension to Phase 4, extendmy.life to Phase 5, reports to Phase 6. Backend first, then its screen, in each slice. Docs packages playwright and @hpcc-js/wasm-graphviz for mise run docs:pdf", "Owner decision: do SEO on one page before the whole site"]],
+    ["14%", "56%", "30%"]) + "</div>",
     "When a strategy changes, strike the old task in PLAN.md, add a line to this change log, and update this PDF and the ADR."))
 
 P.append(page("23. Open questions and risks", table(
     ["Item", "Type", "What to do"],
-    [["extendmy.life editor and CMS", "Open question", "Find out which editor the authors use. The extension must support it."],
+    [["DeepSeek API key", "Dependency", "The owner gives the key before slice 4. It goes into the environment (Settings), never into code or git."],
+     ["AI provider data terms", "Open question", "DeepSeek is chosen (8 Oct 2026). Read its data terms before slice 4 sends client page text to it."],
+     ["extendmy.life editor and CMS", "Open question", "Find out which editor the authors use. The extension must support it."],
      ["Search Console for extendmy.life", "Open question", "Get read access to the domain property."],
      ["Health review rule", "Owner decision", "Decide before extendmy.life drafts start: expert reviewer or AI limited to non-medical text."],
      ["German native reviewer", "Dependency", "Name a person. Without one, German drafts stay in Draft."],
      ["German law for aesthetic clinics (HWG)", "Legal", "Ask a lawyer before drafts for aesthetic clinic pages."],
      ["Review cycle for health pages", "Open question", "Agree how often health pages need a review, for example every 6 months."],
      ["Code ownership", "Open question", "Find out if Gurzu or the client owns the code. This sets the NOTICE text."],
-     ["AI provider data terms", "Open question", "Read the DeepSeek data terms before you send client pages to it."],
+     ["One page is not the whole picture", "Risk", "Some checks need other pages (duplicate keywords, internal links to the page). The sitemap list helps a little. The full checks come in Phase 3."],
      ["Extension and editor changes", "Risk", "A weekly test checks that the editor fields still exist."],
      ["Small sites, few queries", "Risk", "Search Console hides rare queries. Add paid keyword data only if free data is too thin."],
      ["New tool versions", "Risk", "pnpm 12, Vitest 5 and SQLAlchemy 2.1 are new major versions. Lock files and Dependabot delays reduce the risk."],

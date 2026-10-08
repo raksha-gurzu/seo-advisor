@@ -9,7 +9,7 @@ digraph G {
   E1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>2. Experiment</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">throwaway spike<BR/>in experiments/</FONT></TD></TR></TABLE>> shape="box" style="filled,dashed" fillcolor="#f2f5f9" color="#7a8899" penwidth=1.7];
   I1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>3. Implement</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">small PR with tests,<BR/>only what the spike proved</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
   U1 [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>4. Understand</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">Claude walks through the code,<BR/>short note in docs/notes/</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
-  UP [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>5. Review the plan</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">strategy changed? Update plan.md,<BR/>this PDF and an ADR</FONT></TD></TR></TABLE>> shape="note" style="filled" fillcolor="#ffffff" color="#475467" penwidth=1.7];
+  UP [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>5. Review the plan</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">strategy changed? Update PLAN.md,<BR/>this PDF and an ADR</FONT></TD></TR></TABLE>> shape="note" style="filled" fillcolor="#ffffff" color="#475467" penwidth=1.7];
   Q -> R1 [];
   R1 -> E1 [];
   E1 -> I1 [label=<<B> works </B>> fontcolor="#3b4654"];

@@ -82,9 +82,10 @@
 <!-- C4 -->
 <g id="node6" class="node">
 <title>C4</title>
-<polygon fill="#ffffff" stroke="#0b2a4a" stroke-width="1.7" points="612.6,-603.92 475.4,-603.92 475.4,-563.44 612.6,-563.44 612.6,-603.92"/>
-<text xml:space="preserve" text-anchor="start" x="486.48" y="-588.08" font-family="Arial" font-weight="bold" font-size="12.00">0.6 Web + extension</text>
-<text xml:space="preserve" text-anchor="start" x="491.76" y="-571.48" font-family="Arial" font-size="10.00" fill="#4a5565">Vite, oxlint, Vitest, WXT</text>
+<polygon fill="#ffffff" stroke="#0b2a4a" stroke-width="1.7" points="613.17,-609.92 474.83,-609.92 474.83,-557.44 613.17,-557.44 613.17,-609.92"/>
+<text xml:space="preserve" text-anchor="start" x="486.48" y="-594.08" font-family="Arial" font-weight="bold" font-size="12.00">0.6 Web + extension</text>
+<text xml:space="preserve" text-anchor="start" x="485.91" y="-577.48" font-family="Arial" font-size="10.00" fill="#4a5565">Vite, TanStack, shadcn/ui,</text>
+<text xml:space="preserve" text-anchor="start" x="503.16" y="-565.48" font-family="Arial" font-size="10.00" fill="#4a5565">oxlint, Vitest, WXT</text>
 </g>
 <!-- E -->
 <g id="node8" class="node">

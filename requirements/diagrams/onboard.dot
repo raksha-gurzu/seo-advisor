@@ -1,25 +1,31 @@
 digraph G {
-  graph [rankdir=TB fontname="Arial" nodesep=0.5 ranksep=0.36 splines=spline bgcolor="transparent"
+  graph [rankdir=TB fontname="Arial" nodesep=0.5 ranksep=0.3 splines=spline bgcolor="transparent"
          pad=0.15 newrank=true compound=true];
   node  [fontname="Arial" fontsize=12 margin="0.14,0.07"];
   edge  [fontname="Arial" fontsize=11 color="#5a6675" penwidth=1.4 arrowsize=0.75];
-  S [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Add a site</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">base URL, languages,<BR/>YMYL yes or no</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
-  A [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Connect Search Console</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">read-only access to the<BR/>property (domain property)</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#e4eefb" color="#0b5cad" penwidth=1.7];
-  B [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Read robots.txt and sitemaps</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">sitemap index, one sitemap<BR/>per type and language</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  C [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Build the page inventory</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">one row per URL and language,<BR/>hreflang groups EN-DE</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  D [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Classify page types</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">listing, article, category,<BR/>static. Rules come per type</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  E [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Baseline crawl and audit</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">all pages, all rules</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  F [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Baseline Search Console</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">16 months of page and query data</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
-  G [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>SEO team checks the baseline</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">removes false findings,<BR/>sets priorities</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
-  H [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Site is live in the platform</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">schedules start</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
-  S -> A [];
-  A -> B [];
-  B -> C [];
-  C -> D [];
-  D -> E [];
-  D -> F [];
-  E -> G [];
-  F -> G [];
-  G -> H [];
-  { rank=same; E; F; }
+  S [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>1. Paste a URL and a keyword</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">for example a MyPipit blog post<BR/>and &quot;Annapurna base camp trek&quot;</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
+  G [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>On a registered</B><BR/><B>site?</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fff3d6" color="#c77700" margin="0.04" penwidth=1.7];
+  NO [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Refuse</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">the tool reads only<BR/>registered sites</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#fde7e7" color="#b42318" penwidth=1.7];
+  F [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>2. Fetch one page</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">safe fetcher: robots.txt,<BR/>rate limit, SSRF guard; snapshot</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  X [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>3. Extract the SEO content</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">title, meta, headings, images,<BR/>links, structured data, text</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  A [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>4. Audit with rules</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">each finding: evidence and<BR/>source; &quot;unknown&quot; if not seen</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  SG [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>5. AI suggestions (DeepSeek)</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">facts only from the page,<BR/>other facts [ADD: ...]</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  CK [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Checks</B><BR/><B>pass?</B></TD></TR></TABLE>> shape="diamond" style="filled" fillcolor="#fde7e7" color="#b42318" margin="0.04" penwidth=1.7];
+  RW [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>Rewrite once</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">then fail</FONT></TD></TR></TABLE>> shape="box" style="filled" fillcolor="#ffffff" color="#0b2a4a" penwidth=1.7];
+  R [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>6. A person reviews</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">accept, edit or reject; copy into<BR/>the site editor and save there.<BR/>The tool never publishes.</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled,bold" fillcolor="#fff8e6" color="#8a5a00" penwidth=1.7];
+  RC [label=<<TABLE BORDER="0" CELLSPACING="0" CELLPADDING="1"><TR><TD><B>7. Check the page again</B></TD></TR><TR><TD><FONT POINT-SIZE="10" COLOR="#4a5565">new snapshot and audit run,<BR/>compared with the last run</FONT></TD></TR></TABLE>> shape="box" style="rounded,filled" fillcolor="#e3f4e8" color="#2e7d4f" penwidth=1.7];
+  S -> G [];
+  G -> NO [label=<<B> No </B>> fontcolor="#b42318"];
+  G -> F [label=<<B> Yes </B>> fontcolor="#2e7d4f"];
+  F -> X [];
+  X -> A [];
+  A -> SG [];
+  SG -> CK [];
+  CK -> RW [label=<<B> No </B>> fontcolor="#b42318"];
+  RW -> CK [];
+  CK -> R [label=<<B> Yes </B>> fontcolor="#2e7d4f"];
+  R -> RC [];
+  RC -> A [style="dashed" constraint="false" label=<<B> next round </B>> fontcolor="#3b4654"];
+  { rank=same; G; NO; }
+  { rank=same; CK; RW; }
 }

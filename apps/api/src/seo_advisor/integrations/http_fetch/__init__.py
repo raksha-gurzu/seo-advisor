@@ -16,14 +16,22 @@ from seo_advisor.integrations.http_fetch.robots import (
     RobotsRules,
     SafeFetcher,
 )
+from seo_advisor.integrations.http_fetch.trace import (
+    FetchEvent,
+    FetchTrace,
+    trace_scope,
+)
 
 __all__ = [
     "BlockedAddressError",
     "ContentEncodingError",
     "Download",
     "FetchConfig",
+    "FetchEvent",
+    "FetchTrace",
     "RedirectLimitError",
     "RobotsDisallowedError",
     "RobotsRules",
     "SafeFetcher",
+    "trace_scope",
 ]

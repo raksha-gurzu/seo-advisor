@@ -24,6 +24,12 @@ from seo_advisor.integrations.http_fetch.guard import (
     deadline_scope,
     require_web_scheme,
 )
+from seo_advisor.integrations.http_fetch.trace import (
+    FetchEvent,
+    FetchKind,
+    FetchOutcome,
+    current_trace,
+)
 
 DISALLOW_ALL = "User-agent: *\nDisallow: /"
 ROBOTS_MAX_BYTES = 512_000  # RFC 9309 §2.5: parse at least the first 500 KiB
@@ -112,6 +118,7 @@ class SafeFetcher:
         key = origin_key(url)
         cached = self._robots.get(key)
         if cached is not None and self._clock() - cached[0] < ROBOTS_MAX_AGE_S:
+            _record_cached_robots(key, urljoin(display_url(url), "/robots.txt"))
             return cached[1]
         robots_url = urljoin(display_url(url), "/robots.txt")
         status: int | None
@@ -139,6 +146,9 @@ class SafeFetcher:
             Protego.parse(body), self.config.robots_agent, status, unreachable
         )
         self._robots[key] = (self._clock(), rules)
+        trace = current_trace()
+        if trace is not None:
+            trace.robots_shown.add(key)
         return rules
 
     def get(self, url: str, max_bytes: int) -> Download:
@@ -156,23 +166,61 @@ class SafeFetcher:
         start = url
         with deadline_scope(time.monotonic() + self.config.deadline_s):
             for _ in range(MAX_REDIRECTS + 1):
-                require_web_scheme(url)
-                if obey:
-                    self._require_allowed(url)
-                self.limiter.wait(httpx.URL(url).host)
-                got = bounded_get(
-                    self.client,
-                    url,
-                    max_bytes,
-                    self.config.deadline_s,
-                    keep_head=keep_head,
-                )
+                got = self._hop(url, max_bytes, keep_head=keep_head, obey=obey)
                 if got.location is None:
                     return got
                 url = urljoin(url, got.location)
         raise RedirectLimitError(
             f"{display_url(start)}: more than {MAX_REDIRECTS} redirects"
         )
+
+    def _hop(
+        self, url: str, max_bytes: int, *, keep_head: bool, obey: bool
+    ) -> Download:
+        """One request after its checks. The open trace, if any, records the result.
+
+        The except blocks only record the event; each error goes on to the caller.
+        """
+        kind: FetchKind = "page" if obey else "robots"
+        shown = display_url(url)
+        begin = waited = time.monotonic()
+        try:
+            require_web_scheme(url)
+        except BlockedAddressError as exc:
+            _record(kind, shown, "blocked", None, 0, begin, waited, str(exc))
+            raise
+        if obey:
+            # Reading robots.txt here records its own event. Its errors pass through
+            # unrecorded: they are already in the trace.
+            try:
+                self._require_allowed(url)
+            except RobotsDisallowedError as exc:
+                now = time.monotonic()  # after the robots.txt read, if there was one
+                _record(kind, shown, "disallowed", None, 0, now, now, str(exc))
+                raise
+        try:
+            begin = time.monotonic()
+            self.limiter.wait(httpx.URL(url).host)
+            waited = time.monotonic()
+            got = bounded_get(
+                self.client, url, max_bytes, self.config.deadline_s, keep_head=keep_head
+            )
+        except BlockedAddressError as exc:
+            _record(kind, shown, "blocked", None, 0, begin, waited, str(exc))
+            raise
+        except (httpx.HTTPError, ContentEncodingError) as exc:
+            # Only the error type: a message can hold system details.
+            _record(kind, shown, "error", None, 0, begin, waited, type(exc).__name__)
+            raise
+        outcome: FetchOutcome = (
+            "redirect"
+            if got.location is not None
+            else "too_large"
+            if got.too_large
+            else "ok"
+        )
+        _record(kind, shown, outcome, got.status, len(got.content), begin, waited)
+        return got
 
     def _require_allowed(self, url: str) -> None:
         rules = self.robots(url)
@@ -197,3 +245,41 @@ class SafeFetcher:
         tb: TracebackType | None,
     ) -> None:
         self.close()
+
+
+def _record(
+    kind: FetchKind,
+    url: str,
+    outcome: FetchOutcome,
+    status: int | None,
+    size: int,
+    begin: float,
+    waited: float,
+    detail: str = "",
+) -> None:
+    trace = current_trace()
+    if trace is None:  # nobody asked for a trace
+        return
+    trace.events.append(
+        FetchEvent(
+            kind=kind,
+            url=url,
+            outcome=outcome,
+            status=status,
+            bytes=size,
+            started_ms=trace.ms_since_start(begin),
+            waited_ms=round((waited - begin) * 1000),
+            duration_ms=round((time.monotonic() - waited) * 1000),
+            detail=detail,
+        )
+    )
+
+
+def _record_cached_robots(origin: str, robots_url: str) -> None:
+    """Show the cached rules once per trace, so the trace says where they came from."""
+    trace = current_trace()
+    if trace is None or origin in trace.robots_shown:
+        return
+    trace.robots_shown.add(origin)
+    now = time.monotonic()
+    _record("robots", robots_url, "cached", None, 0, now, now)

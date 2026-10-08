@@ -9,6 +9,7 @@ from typing import NamedTuple
 import httpx
 from pydantic import BaseModel, ConfigDict
 
+from seo_advisor.core.config import Settings
 from seo_advisor.integrations.http_fetch.guard import (
     PublicOnlyBackend,
     deadline_scope,
@@ -26,6 +27,16 @@ class FetchConfig(BaseModel):
     timeout_s: float
     deadline_s: float
     min_delay_s: float
+
+    @classmethod
+    def from_settings(cls, settings: Settings) -> FetchConfig:
+        return cls(
+            user_agent=settings.fetch_user_agent,
+            robots_agent=settings.fetch_robots_agent,
+            timeout_s=settings.fetch_timeout_s,
+            deadline_s=settings.fetch_deadline_s,
+            min_delay_s=settings.fetch_min_delay_s,
+        )
 
 
 def public_client(

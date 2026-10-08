@@ -61,6 +61,7 @@ class SiteRecord(_Frozen):
 
     id: uuid.UUID
     tenant_id: uuid.UUID
+    tenant_name: str
     base_url: str
     language: str
     page_types: list[PageTypeRule]

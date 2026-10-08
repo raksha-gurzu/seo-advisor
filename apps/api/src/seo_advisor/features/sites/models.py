@@ -5,7 +5,7 @@ from typing import Any
 
 from sqlalchemy import ForeignKey, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from seo_advisor.core.db import Base, IdMixin, TimestampMixin
 
@@ -29,3 +29,4 @@ class Site(IdMixin, TimestampMixin, Base):
     base_url: Mapped[str] = mapped_column(Text)
     language: Mapped[str] = mapped_column(Text)
     page_types: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
+    tenant: Mapped[Tenant] = relationship(lazy="joined")

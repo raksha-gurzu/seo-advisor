@@ -28,6 +28,12 @@ def get_site(session: Session, site_id: uuid.UUID) -> Site:
     return session.scalars(select(Site).where(Site.id == site_id)).one()
 
 
+def list_sites(session: Session) -> list[Site]:
+    """All sites, by tenant name, then base URL."""
+    query = select(Site).join(Site.tenant).order_by(Tenant.name, Site.base_url)
+    return list(session.scalars(query))
+
+
 def save_site(
     session: Session,
     tenant_id: uuid.UUID,

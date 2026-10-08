@@ -4,8 +4,10 @@ import tomllib
 import uuid
 from pathlib import Path
 
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
+from seo_advisor.core.errors import NotFoundError
 from seo_advisor.features.sites import repository
 from seo_advisor.features.sites.models import Site
 from seo_advisor.features.sites.schemas import (
@@ -18,12 +20,18 @@ from seo_advisor.features.sites.schemas import (
 __all__ = [
     "PageType",
     "PageTypeRule",
+    "SiteNotFoundError",
     "SiteRecord",
     "SiteSpec",
     "get_site",
+    "list_sites",
     "load_site_spec",
     "register_site",
 ]
+
+
+class SiteNotFoundError(NotFoundError):
+    """No site has this id."""
 
 
 def load_site_spec(path: Path) -> SiteSpec:
@@ -47,13 +55,22 @@ def register_site(session: Session, spec: SiteSpec) -> SiteRecord:
 
 
 def get_site(session: Session, site_id: uuid.UUID) -> SiteRecord:
-    return _record(repository.get_site(session, site_id))
+    try:
+        site = repository.get_site(session, site_id)
+    except NoResultFound:
+        raise SiteNotFoundError(f"site {site_id} does not exist") from None
+    return _record(site)
+
+
+def list_sites(session: Session) -> list[SiteRecord]:
+    return [_record(site) for site in repository.list_sites(session)]
 
 
 def _record(site: Site) -> SiteRecord:
     return SiteRecord(
         id=site.id,
         tenant_id=site.tenant_id,
+        tenant_name=site.tenant.name,
         base_url=site.base_url,
         language=site.language,
         page_types=[PageTypeRule.model_validate(rule) for rule in site.page_types],

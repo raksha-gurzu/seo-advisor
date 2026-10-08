@@ -1,0 +1,149 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Colour tokens: "Indigo Ledger". Raw OKLCH values; @theme maps them to utilities.
+ * - primary (indigo, hue 277) means "act here": buttons, links, focus, active nav.
+ *   It is never a status colour.
+ * - status colours carry meaning and always come with an icon and a word.
+ * - neutrals are a cool grey with a small indigo tint (hue 265).
+ * Contrast: text >= 4.5:1, borders of inputs and focus rings >= 3:1 (WCAG 2.2 AA).
+ */
+:root {
+  --background: oklch(0.99 0.003 265);
+  --foreground: oklch(0.22 0.02 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.02 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.02 265);
+  --primary: oklch(0.5 0.2 277);
+  --primary-foreground: oklch(0.985 0.005 277);
+  --secondary: oklch(0.965 0.006 265);
+  --secondary-foreground: oklch(0.27 0.02 265);
+  --muted: oklch(0.965 0.006 265);
+  --muted-foreground: oklch(0.5 0.03 265);
+  --accent: oklch(0.955 0.025 277);
+  --accent-foreground: oklch(0.38 0.16 277);
+  --border: oklch(0.915 0.01 265);
+  --input: oklch(0.66 0.02 265);
+  --ring: oklch(0.5 0.2 277);
+  --sidebar: oklch(0.977 0.004 265);
+
+  --critical: oklch(0.53 0.21 27);
+  --warning: oklch(0.56 0.15 55);
+  --success: oklch(0.52 0.12 160);
+  --info: oklch(0.53 0.12 235);
+
+  /* Page-type categories: distinct hues, always shown with their name. */
+  --cat-1: oklch(0.55 0.19 277);
+  --cat-2: oklch(0.6 0.13 230);
+  --cat-3: oklch(0.6 0.12 185);
+  --cat-4: oklch(0.68 0.15 75);
+  --cat-5: oklch(0.58 0.18 330);
+  --cat-6: oklch(0.6 0.15 300);
+  --cat-7: oklch(0.62 0.14 140);
+  --cat-8: oklch(0.6 0.16 25);
+  --cat-other: oklch(0.7 0.01 265);
+
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: oklch(0.16 0.015 265);
+  --foreground: oklch(0.95 0.006 265);
+  --card: oklch(0.195 0.018 265);
+  --card-foreground: oklch(0.95 0.006 265);
+  --popover: oklch(0.21 0.018 265);
+  --popover-foreground: oklch(0.95 0.006 265);
+  --primary: oklch(0.7 0.15 277);
+  --primary-foreground: oklch(0.18 0.04 277);
+  --secondary: oklch(0.24 0.018 265);
+  --secondary-foreground: oklch(0.92 0.008 265);
+  --muted: oklch(0.235 0.018 265);
+  --muted-foreground: oklch(0.72 0.03 265);
+  --accent: oklch(0.27 0.045 277);
+  --accent-foreground: oklch(0.88 0.07 277);
+  --border: oklch(0.29 0.02 265);
+  --input: oklch(0.5 0.02 265);
+  --ring: oklch(0.7 0.15 277);
+  --sidebar: oklch(0.18 0.016 265);
+
+  --critical: oklch(0.72 0.17 22);
+  --warning: oklch(0.8 0.15 75);
+  --success: oklch(0.76 0.14 160);
+  --info: oklch(0.76 0.12 230);
+
+  --cat-1: oklch(0.72 0.15 277);
+  --cat-2: oklch(0.74 0.12 230);
+  --cat-3: oklch(0.75 0.11 185);
+  --cat-4: oklch(0.8 0.14 80);
+  --cat-5: oklch(0.72 0.16 330);
+  --cat-6: oklch(0.72 0.14 300);
+  --cat-7: oklch(0.76 0.14 140);
+  --cat-8: oklch(0.72 0.15 25);
+  --cat-other: oklch(0.55 0.015 265);
+}
+
+@theme inline {
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-critical: var(--critical);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-info: var(--info);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+    /* Inter: open digits and a clear "l" for URLs and counts. */
+    font-feature-settings: "cv11", "ss01";
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--primary) 22%, transparent);
+  }
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}

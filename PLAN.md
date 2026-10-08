@@ -3,12 +3,13 @@
 What to build and in which order. How to work: `CLAUDE.md` (repo root).
 
 - General multi-site SEO tool. MyPipit and extendmy.life are test sites, not design targets.
+- **Single page first (8 Oct 2026).** The tool fetches one page and does SEO on that page: audit with evidence, then AI suggestions that a person reviews. The whole site comes later (Phase 3).
 - Full version for people: `requirements/seo-advisor-requirements.pdf` (same plan, with reasons and diagrams). Keep it in sync with this file.
 - Evidence: `requirements/research/` · R1 platform · R2 content SEO · R3 MyPipit · R4 project setup (`§` = section).
 - Work on the current step only, in small parts. Tick a task only when its "Done when" is true.
 - Plan changes: strike the old task (`~~task~~ — why`), add a change-log line, update the PDF and the ADR.
 
-**Current step:** Phase 1, slice 1 stages 3-4 (owner walk-through, plan review); then slice 2 (save sites and pages).
+**Current step:** Phase 1, slice 2: fetch one MyPipit blog post and extract its SEO content (backend), then its screen. Open: slice 1 stages 3-4 (owner walk-through, plan review).
 
 ## Session habits (for you)
 
@@ -24,10 +25,12 @@ Each decision gets an ADR in `docs/decisions/` (step 0.10).
 | Topic | Decision |
 |---|---|
 | Product | Read-only on client sites. The extension fills the site editor; a person saves. Never publish. |
+| Scope | Single page first: a person pastes a URL of a registered site and a target keyword; the tool fetches that page, audits it, and later suggests fixes. The sitemap list is only a page picker. Whole site in Phase 3. |
+| AI provider | DeepSeek (owner decision, 8 Oct 2026), through `integrations/llm`; key in `Settings`. The AI writes text only; code counts and scores. |
 | Reviews | Gurzu 2i review, then client approval. Expert review for health; native review for German. |
 | Structure | Modular monolith grouped by feature; features talk only through `service.py` (layout in `CLAUDE.md`). |
 | Stack | Python, uv, FastAPI, Pydantic, SQLAlchemy (sync), Alembic, DBOS · PostgreSQL + pgvector · React, TypeScript, Vite, pnpm, TanStack Router + Query + Table, Tailwind CSS + shadcn/ui · WXT · mise · Docker Compose. |
-| Frontend | React single-page app; no Next.js, no global store. TanStack Router, Query, Table; Tailwind CSS + shadcn/ui (code in the repo). React Hook Form + Zod from Phase 2; Recharts from Phase 5. |
+| Frontend | React single-page app; no Next.js, no global store. TanStack Router, Query, Table; Tailwind CSS + shadcn/ui (code in the repo). React Hook Form + Zod when the first real form needs them (slice 3 or 4); Recharts from Phase 6. |
 | Tenancy | Shared schema, `tenant_id` + `site_id` on every row; row-level security later. |
 | Git and CI | Protected `main`, squash merge, Conventional Commits PR titles, Dependabot, gitleaks. 0 approvals while one engineer; 1 when a second joins. |
 | Repo | Package `seo_advisor`. Reuse from SEOAdvisor: fetcher + SSRF guard, robots (Protego), title pixel check, AI wrapper. |
@@ -36,7 +39,7 @@ Each decision gets an ADR in `docs/decisions/` (step 0.10).
 
 - [ ] extendmy.life editor/CMS · [ ] Search Console access for extendmy.life · [ ] Health content rule
 - [ ] Native German reviewer · [ ] HWG §11 legal check · [ ] Review cycle for health pages
-- [ ] Code owner (Gurzu or client), sets the NOTICE · [ ] AI provider data terms before client pages are sent (R4 §11.7)
+- [ ] Code owner (Gurzu or client), sets the NOTICE · [ ] AI provider data terms before client pages are sent (R4 §11.7): DeepSeek chosen; check its terms at slice 4 · [ ] DeepSeek API key (owner gives it before slice 4)
 
 ## Tool versions (for setup only; afterwards the lock files decide)
 
@@ -50,14 +53,14 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 >
 > | Step | Starts with |
 > |---|---|
-> | 0.4 Database | Slice 2. Only the tables that the slice needs (`tenants`, `sites`, `pages`). |
-> | 0.5 API | Slice 3 |
-> | 0.6 Web app | Slice 5. The extension starts in Phase 3. |
+> | 0.4 Database | Slice 2. Only the tables that each slice needs: `tenants`, `sites` (done); `pages`, `page_snapshots` (slice 2); `audit_runs`, `findings` (slice 3); `suggestions`, `llm_calls` (slice 4). |
+> | 0.5 API | ~~Slice 3~~ Started 8 Oct 2026 with the web app; structlog is still open |
+> | 0.6 Web app | ~~Slice 5~~ Started 8 Oct 2026: each slice now ends with its screen. The extension starts in Phase 4. |
 > | 0.7 Hooks, 0.8 CI | Before the first pull request into `dev`, or when the owner decides |
 > | 0.9 Claude Code settings | When the owner decides. Recommended soon: deny reads of `.env`. |
 > | 0.10 ADRs | Write each ADR when its decision is made or first used. |
 > | 0.11 SSRF guard | Slice 1 (the first outbound fetch) |
-> | 0.11 AI layer, evals | Phase 3 (AI drafts) |
+> | 0.11 AI layer, evals | Slice 4 (AI suggestions, DeepSeek) |
 > | 0.12 Final check | Before a second person joins |
 
 **0.1 Machine**
@@ -75,15 +78,15 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 
 **0.4 Database** (R4 §5.1, §13)
 - [ ] Compose: pgvector image, volume at `/var/lib/postgresql`, health check, `CREATE EXTENSION vector`. Done when: `mise run db:up` is healthy.
-- [ ] SQLAlchemy `Base` + Alembic naming convention and `date_rev_slug` file template. First migration: `uuidv7()` keys, `timestamptz`, tables tenants, users, sites, pages, page_snapshots, audit_runs, findings, rules. Done when: `alembic upgrade head` + `alembic check` pass on an empty DB.
+- [ ] SQLAlchemy `Base` + Alembic naming convention and `date_rev_slug` file template. First migration: `uuidv7()` keys, `timestamptz`, tables tenants, ~~users~~, sites, pages, page_snapshots, audit_runs, findings, ~~rules~~ (8 Oct 2026: rules live in code, each with a source; `users` comes with login). Done when: `alembic upgrade head` + `alembic check` pass on an empty DB.
 - [ ] Fixtures: testcontainers per session, rollback per test, DBOS reset. Seed: 2 fake sites. Done when: an integration test passes twice in a row.
 
 **0.5 API** (R4 §12, §14)
-- [ ] FastAPI `/api/v1` + `/health`, RFC 9457 error handler (write it), request-ID middleware, structlog, `operation_id` per route. Done when: an error returns `application/problem+json` with `request_id`.
-- [ ] `gen-client`: `openapi.json` → `packages/api-client`. Done when: the web app calls `/health` through it.
+- [ ] FastAPI `/api/v1` + `/health`, RFC 9457 error handler (write it), request-ID middleware, structlog, `operation_id` per route. Done when: an error returns `application/problem+json` with `request_id`. (8 Oct 2026: all except structlog.)
+- [x] `gen-client`: `openapi.json` → `packages/api-client`. Done when: the web app calls `/health` through it.
 
 **0.6 Web and extension** (R4 §2, §3)
-- [ ] Vite react-ts, strict TS flags (R4 §2.5), oxlint + Prettier, Vitest + Testing Library + MSW, TanStack Router + Query + Table, Tailwind CSS + shadcn/ui (components in `src/shared/ui`); folders as in `CLAUDE.md` → Structure; keep pnpm `minimumReleaseAge`, no install scripts allowed. Check the version, licence and advisories of each library that R4 does not cover. Done when: lint, types, tests and build pass.
+- [x] Vite react-ts, strict TS flags (R4 §2.5), oxlint + Prettier, Vitest + Testing Library + MSW, TanStack Router + Query + Table, Tailwind CSS + shadcn/ui (components in `src/shared/ui`); folders as in `CLAUDE.md` → Structure; keep pnpm `minimumReleaseAge`, no install scripts allowed. Check the version, licence and advisories of each library that R4 does not cover. Done when: lint, types, tests and build pass.
 - [ ] WXT skeleton (exact version), minimal permissions, no remote code. Done when: it loads in Chromium and calls `/health`.
 
 **0.7 Hooks** (R4 §8)
@@ -103,7 +106,7 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 
 **0.11 Security and AI base** (R4 §11, §15)
 - [ ] SSRF guard + tests for each blocked range and DNS rebinding. Done when: tests pass before any crawler code exists.
-- [ ] AI layer: provider interface, model and price settings, `llm_calls` table, versioned prompts, recorded fixtures (keys filtered), cost caps per run and day; one key per person and a spend limit per provider. Done when: a recorded call replays in CI with no network.
+- [ ] AI layer (slice 4, DeepSeek; reuse SEOAdvisor `providers/llm.py`): provider interface, model and price settings, `llm_calls` table, versioned prompts, recorded fixtures (keys filtered), cost caps per run and day; one key per person and a spend limit per provider. Done when: a recorded call replays in CI with no network.
 - [ ] `evals/` with 20 cases and code-based graders. Done when: `mise run evals` prints a score table.
 
 **0.12 Final check**
@@ -113,43 +116,43 @@ Checked 6 Oct 2026; re-check on setup day. Python 3.14.8 · uv 0.12.23 · ruff 0
 
 ---
 
-## Phase 1: Inventory and audit (test site MyPipit, 2 to 3 weeks)
+## Phase 1: One page, end to end (MyPipit blog post, 2 to 3 weeks)
 
-**Slices (order of work).** Each slice is one small pull request that works from end to end. The tasks after the slices describe the full phase.
-- [x] Slice 1: spike, then `inventory`: safe fetcher (SSRF guard, robots.txt with Protego, rate limit per host; reuse from SEOAdvisor), sitemap and sitemap-index reader, page type and language for each URL. Live fetch: only `robots.txt` and the sitemaps of MyPipit, read-only, a few requests; save them as test fixtures. Done when: the MyPipit URL list = its sitemap URLs, and the tests use only the fixtures.
-- [ ] Slice 2: save sites and pages (step 0.4: Compose, SQLAlchemy, Alembic; tables `tenants`, `sites`, `pages`). Done when: a second run changes no rows, and an integration test passes twice.
-- [ ] Slice 3: `GET /api/v1/sites/{id}/pages` (step 0.5). Done when: the endpoint returns the stored MyPipit pages.
-- [ ] Slice 4: crawl, snapshots, first rules, findings with evidence, DBOS schedule. Done when: each finding has evidence.
-- [ ] Slice 5: findings screen (step 0.6). Done when: the SEO team reviews findings there.
+> **Changed 8 Oct 2026: single page first.** ~~Phase 1 = inventory of the whole site, full crawl, scheduled audits, Search Console sync.~~ — The owner wants SEO on one page first. Whole-site tasks move to Phase 3.
 
-- [ ] `sites`, `inventory`: onboarding, robots.txt, sitemap index, page types. Done when: inventory = sitemap URLs.
-- [ ] `inventory`: crawler (robots, rate limit per host, snapshots). Done when: a full crawl is stored.
-- [ ] `audits`: rule engine; rules per page type and language, each with a source (PDF §12). Done when: each finding has evidence.
-- [ ] `audits`: DBOS schedules (daily, weekly, monthly); compare runs. Done when: 2 weeks without a manual start.
-- [ ] `search_data`: Search Console sync (R1 §5). Done when: 16 months stored, daily rows added.
-- [ ] Web: findings view. Done when: the SEO team reviews findings there.
-- [ ] **Check:** ≥ 90% of findings correct; else fix the rules first.
+**The page loop.** (1) A person pastes a URL of a registered site and types the target keyword. (2) The tool fetches that one page through the safe fetcher. (3) It extracts the SEO content. (4) It audits the page with rules; each finding has evidence. (5) The AI suggests fixes. (6) A person reviews them and copies them into the site editor. (7) The tool checks the page again.
 
-## Phase 2: Content workflow (2 weeks)
-- [ ] `content`: items, immutable versions, state events, reviews (R1 §2.4). Done when: every change has a version and an event.
-- [ ] `content`: states and roles (PDF §4). Done when: nobody approves own item; every transition tested.
-- [ ] `content`: work queue (impact × confidence ÷ effort; template vs page fixes; batches of 5-10). Done when: top 10 with reasons.
-- [ ] `search_data`: keyword-to-page map, one primary per page and language. Done when: duplicates blocked.
+**Slices (order of work).** Each slice is one small pull request that works from end to end. In each slice, build and check the backend first, then its screen in the web app (`make dev`). The coding rules in `CLAUDE.md` do not change.
+- [x] Slice 1: spike, then `inventory`: safe fetcher (SSRF guard, robots.txt with Protego, rate limit per host; reuse from SEOAdvisor), sitemap reader, page type and language for each URL. Done when: the MyPipit URL list = its sitemap URLs, and the tests use only the fixtures. The sitemap list is now the page picker.
+- [x] Slice 2a: database base, tables `tenants` and `sites`, `make seed` (step 0.4).
+- [x] Web app and API for slice 1 (8 Oct 2026): sites list, sitemap list, request trace, page-type rules and URL tester; `make dev`. These screens change in slice 2.
+- [ ] ~~Slice 2b: save all sitemap pages (`inventory:sync`).~~ — Single page first: only analysed pages are saved.
+- [ ] Slice 2: fetch and extract one page. Spike: fetch 1 MyPipit blog post, save it as a fixture. Backend: `inventory.fetch_page` (URL must be on a registered site), tables `pages` and `page_snapshots` (HTML with a size limit, hash, final URL, status), extractor (title, meta description, canonical, meta robots, `lang`, H1-H6 with levels, images and `alt`, links with anchor text, Open Graph, JSON-LD with properties, main text and word count). Reuse SEOAdvisor `tools/site_checks.py` (`read_tags`, `says_noindex`). Frontend: "Analyse a page" (paste a URL, or pick one from the sitemap list; see the extracted content). Done when: the extracted fields of the fixture page are correct in tests, and the screen shows them for a live MyPipit post.
+- [ ] Slice 3: audit one page. Backend: `audits` with rules for blog posts, each with a source (R3), severity and evidence (selector, found, expected); tables `audit_runs`, `findings`; the target keyword is part of the run. First rules: title present, pixel width (reuse SEOAdvisor `tools/snippet_check.py`), keyword in title; meta description present and length (rule of thumb); one H1, keyword in H1, heading order; image `alt` present and not stuffed, stable image URLs; `og:image` present (1200 x 630); canonical present and self; no `noindex`; BlogPosting with author, datePublished, dateModified, headline, image; internal links in `<a href>` with descriptive anchors; readable slug; `lang`; word count (information only). A check that cannot see its data says "unknown", not pass. Frontend: findings with evidence, filter by severity, check the page again. Done when: each finding has evidence and a source, and 2 runs of the same page can be compared.
+- [ ] Slice 4: AI suggestions. Backend: step 0.11 AI layer with DeepSeek (reuse SEOAdvisor `providers/llm.py`); `drafts`: suggestions for title, meta description, H1, `alt` text and content notes; facts only from the page, else `[ADD: ...]`; output checked with Pydantic, retry once, then fail; tables `suggestions`, `llm_calls` (model, prompt version, tokens, cost); checks: no invented numbers or names, no copied 8-word runs. Frontend: review each suggestion (accept, edit, reject), copy to the clipboard; never publish. Done when: every AI call is logged, and no invented fact reaches review.
+- [ ] Slice 5: run the loop on 5 MyPipit blog posts with the SEO team. Done when: ≥ 90% of findings are correct, and 7 of 10 suggestions are accepted with small edits; else fix the rules or prompts first.
 
-## Phase 3: AI drafts and extension (2 to 3 weeks)
-- [ ] `drafts`: facts only from the page, `[ADD: ...]`, versioned prompts. Done when: 10 drafts, all calls logged.
-- [ ] `drafts`: checks (no invented numbers or names, no copied 8-word runs, second-model check). Done when: no invented fact reaches review.
-- [ ] Extension for the test site editor: show, fill on Accept, never save. Done when: a person applies and saves one approved draft.
-- [ ] `inventory`: verify after publish by crawl. Done when: Live only after the crawl confirms.
-- [ ] **Check:** 7 of 10 drafts approved with small edits.
+## Phase 2: More page types on MyPipit (1 to 2 weeks)
+- [ ] Rules for listings (treks and tours: travel structured data, R3 §5), blog categories and static pages. Done when: each type has its rule set with sources.
+- [ ] Page type from the content (title, structured data), not only the URL (spike note: `/marketplace/*` mixes treks, tours and guides). Done when: the fixture pages get the correct type.
 
-## Phase 4: Second site and languages (test site extendmy.life, 2 to 3 weeks)
-- [ ] EN + DE inventory, hreflang groups, page types. Done when: matches the 12 sitemaps.
+## Phase 3: Whole site (scale-up, 2 to 3 weeks)
+- [ ] `inventory`: save all sitemap pages; crawler (robots, rate limit per host, snapshots). Done when: a full crawl is stored. (Was Phase 1.)
+- [ ] `audits`: DBOS schedules (daily, weekly, monthly); compare runs. Done when: 2 weeks without a manual start. (Was Phase 1.)
+- [ ] `search_data`: Search Console sync (R1 §5), keyword-to-page map, one primary keyword per page and language, cannibalisation check. Done when: duplicates are blocked.
+- [ ] `content`: items, immutable versions, states and roles, work queue (impact × confidence ÷ effort). Done when: top 10 with reasons. (Was Phase 2.)
+
+## Phase 4: Extension (1 to 2 weeks)
+- [ ] Extension for the test site editor: show approved suggestions, fill on Accept, never save. Done when: a person applies and saves one approved suggestion.
+- [ ] `inventory`: verify after publish by fetching the page again. Done when: "Live" only after the check confirms.
+
+## Phase 5: Second site and languages (test site extendmy.life, 2 to 3 weeks)
+- [ ] EN + DE pages, hreflang groups, page types. Done when: matches the 12 sitemaps.
 - [ ] `audits`: language rules (R2 §3) and health rules (R2 §1-2). Done when: the known issues show as findings.
 - [ ] `content`: native review for German; health rule in code. Done when: neither can be skipped.
 
-## Phase 5: Measure and report (1 to 2 weeks)
-- [ ] `reports`: outcomes at 4, 8, 12 weeks vs unchanged pages of the same type. Done when: shown for every change older than 4 weeks.
+## Phase 6: Measure and report (1 to 2 weeks)
+- [ ] `reports`: outcomes at 4, 8, 12 weeks; per page first, then vs unchanged pages of the same type (needs Phase 3). Done when: shown for every change older than 4 weeks.
 - [ ] `reports`: weekly report and alerts (email or Emitii). Done when: each site owner gets one a week.
 
 ## Later
@@ -171,3 +174,5 @@ Deployment (DevOps) · competitor analysis · paid keyword data · RLS + outside
 | 2026-10-07 | CONTRIBUTING.md and SECURITY.md moved from Should to step 0.2; `db:down` task added; each mise task names the step that makes its input | Owner decision |
 | 2026-10-07 | Step 0.3: `protected` contracts are added per feature (template in `pyproject.toml`); pip-audit checks `uv.lock`; pnpm checks join `check` in step 0.6; the 7-day delay gives ruff 0.16.9 and mypy 2.3.1 | One wildcard contract cannot limit a feature to its own internals; owner decision |
 | 2026-10-07 | Feature-first: Phase 1 in 5 slices; steps 0.4 to 0.12 start when a slice needs them; empty placeholder folders removed | Owner decision: see a real feature first and understand why each part exists |
+| 2026-10-08 | Backend and frontend in parallel: every slice ends with its screen. API (step 0.5, without structlog) and web app (step 0.6) started early; `make` wraps the mise tasks; the fetcher records each request for the Activity screen; jsdom added for web tests; TypeScript 6.0.3 (openapi-typescript needs the TS API) | Owner decision: see what each feature does |
+| 2026-10-08 | Single page first: Phase 1 = one MyPipit blog post end to end (fetch, extract, audit with evidence, DeepSeek suggestions, review). Sitemap list = page picker. Whole site moves to Phase 3; extension Phase 4; extendmy.life Phase 5; reports Phase 6. Backend first, then its screen, in each slice. Docs packages `playwright` and `@hpcc-js/wasm-graphviz` for `mise run docs:pdf` | Owner decision: do SEO on one page before the whole site |

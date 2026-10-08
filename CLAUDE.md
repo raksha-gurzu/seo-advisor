@@ -4,7 +4,7 @@ How to work in this repo. What to build and when: `PLAN.md` (repo root).
 
 ## Project
 
-A general multi-site SEO platform. It keeps a page inventory per site, audits pages on a schedule, ranks the work with the most effect, writes drafts that people review, and measures results in Search Console. MyPipit and extendmy.life are test sites, not design targets.
+A general multi-site SEO platform. **Single page first:** a person gives one page URL of a registered site and a target keyword; the tool fetches that page, extracts its SEO content, audits it with evidence, and suggests fixes (AI, DeepSeek) that a person reviews. Later it scales to the whole site: inventory, scheduled audits, Search Console, measured results. MyPipit is the first test site (blog posts first); extendmy.life comes later. Neither is a design target.
 
 ## How we work
 
@@ -27,8 +27,9 @@ Never build a whole phase at once. Propose the next small part and wait.
 ## Commands
 
 ```bash
+make dev              # = mise run dev; `make` lists all short names
 mise run setup        # tools, deps, database, migrations, seed
-mise run dev          # API + web app
+mise run dev          # database + API (:8000) + web app (:5173)
 mise run check        # lint + types + tests (prints only failures)
 mise run test -- apps/api/tests/audits   # one feature
 mise run audit        # dependency vulnerabilities
@@ -48,11 +49,11 @@ apps/api/src/seo_advisor/
   integrations/    external clients: http_fetch (+ SSRF guard), search_console, crux, llm
   features/
     sites/         tenants, sites, onboarding
-    inventory/     sitemaps, crawler, pages, snapshots
-    audits/        rules, runs, findings, schedules
+    inventory/     sitemap list (page picker), fetch one page, page snapshots; crawler later
+    audits/        rules per page type, runs, findings with evidence; schedules later
     search_data/   Search Console rows, keywords, keyword-to-page map
     content/       items, versions, workflow states, reviews
-    drafts/        AI drafts and their checks
+    drafts/        AI suggestions (DeepSeek) and their checks
     reports/       outcomes, reports, alerts
   main.py          builds the app, mounts feature routers
 apps/api/tests/<feature>/          tests per feature

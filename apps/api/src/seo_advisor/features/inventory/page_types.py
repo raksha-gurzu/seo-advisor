@@ -4,6 +4,7 @@ import re
 from functools import lru_cache
 from urllib.parse import urlsplit
 
+from seo_advisor.features.inventory.schemas import PageTypeMatch
 from seo_advisor.features.sites.service import PageType, PageTypeRule
 
 OTHER: PageType = "other"
@@ -18,10 +19,21 @@ def _compile(pattern: str) -> re.Pattern[str]:
 
 def page_type_of(url: str, rules: list[PageTypeRule]) -> PageType:
     """The page type of the first rule that matches the URL path, else "other"."""
+    return match_page_type(url, rules).page_type
+
+
+def match_page_type(url: str, rules: list[PageTypeRule]) -> PageTypeMatch:
+    """The first rule that matches the URL path, and the path that was compared."""
     path = urlsplit(url).path or "/"
     if len(path) > 1:
         path = path.rstrip("/")
-    for rule in rules:
+    for index, rule in enumerate(rules):
         if _compile(rule.pattern).fullmatch(path):
-            return rule.page_type
-    return OTHER
+            return PageTypeMatch(
+                url=url,
+                path=path,
+                page_type=rule.page_type,
+                rule_index=index,
+                pattern=rule.pattern,
+            )
+    return PageTypeMatch(url=url, path=path, page_type=OTHER)

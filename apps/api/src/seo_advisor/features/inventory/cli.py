@@ -30,13 +30,7 @@ def main(argv: list[str] | None = None) -> int:
         # The message names the missing settings; a traceback adds nothing.
         print(exc, file=sys.stderr)
         return 2
-    config = FetchConfig(
-        user_agent=settings.fetch_user_agent,
-        robots_agent=settings.fetch_robots_agent,
-        timeout_s=settings.fetch_timeout_s,
-        deadline_s=settings.fetch_deadline_s,
-        min_delay_s=settings.fetch_min_delay_s,
-    )
+    config = FetchConfig.from_settings(settings)
     site = load_site_spec(args.site_file)
     with SafeFetcher(config) as fetcher:
         inventory = discover_pages(fetcher, site)

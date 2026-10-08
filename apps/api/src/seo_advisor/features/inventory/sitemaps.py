@@ -6,6 +6,7 @@ from seo_advisor.features.inventory.schemas import ParsedSitemap, SitemapEntry
 from seo_advisor.integrations.http_fetch.client import TooLargeError, gunzip_capped
 
 SITEMAP_MAX_BYTES = 50 * 1024 * 1024  # sitemaps.org: at most 50 MB, uncompressed
+SITEMAP_MAX_ENTRIES = 50_000  # sitemaps.org: at most 50,000 URLs (or sitemaps) per file
 
 
 class InvalidSitemapError(ValueError):
@@ -48,8 +49,13 @@ def parse_sitemap(content: bytes) -> ParsedSitemap:
             f"root element is <{name}>, not urlset or sitemapindex"
         )
     child = "url" if name == "urlset" else "sitemap"
+    nodes = root.xpath(f"./*[local-name()='{child}']")
+    if len(nodes) > SITEMAP_MAX_ENTRIES:
+        raise InvalidSitemapError(
+            f"{len(nodes)} entries; sitemaps.org allows at most {SITEMAP_MAX_ENTRIES}"
+        )
     entries = []
-    for node in root.xpath(f"./*[local-name()='{child}']"):
+    for node in nodes:
         loc = "".join(node.xpath("./*[local-name()='loc']/text()")).strip()
         lastmod = "".join(node.xpath("./*[local-name()='lastmod']/text()")).strip()
         if loc:

@@ -199,4 +199,63 @@ def test_a_sitemap_on_a_private_address_is_never_requested(
     )
     inventory = run(config, web, SITE)
     assert not any(key.startswith("evil.example") for key in web.sent)
-    assert [p.kind for p in inventory.problems] == ["sitemap_blocked"]
+    assert [p.kind for p in inventory.problems] == ["sitemap_on_other_host"]
+
+
+@pytest.mark.unit
+def test_sitemaps_on_other_hosts_are_problems_and_never_requested(
+    config: FetchConfig, dns: dict[str, list[str]]
+) -> None:
+    web = Web(
+        dns,
+        {
+            "s.example/robots.txt": (
+                200,
+                b"Sitemap: https://s.example/index.xml\n"
+                b"Sitemap: https://other.example/a.xml\n",
+            ),
+            "s.example/index.xml": (200, index("https://third.example/b.xml")),
+            "other.example/a.xml": (200, urlset("https://s.example/a")),
+            "third.example/b.xml": (200, urlset("https://s.example/b")),
+        },
+    )
+    inventory = run(config, web, SITE)
+    assert not any(key.startswith(("other.", "third.")) for key in web.sent)
+    assert [(p.kind, p.url) for p in inventory.problems] == [
+        ("sitemap_on_other_host", "https://other.example/a.xml"),
+        ("sitemap_on_other_host", "https://third.example/b.xml"),
+    ]
+
+
+@pytest.mark.unit
+def test_a_page_url_that_is_not_http_is_a_problem(
+    config: FetchConfig, dns: dict[str, list[str]]
+) -> None:
+    body = urlset(
+        "javascript://s.example/%0aalert(1)", "http://[::1/x", "https://s.example/a"
+    )
+    inventory = run(config, Web(dns, {"s.example/sitemap.xml": (200, body)}), SITE)
+    assert [p.url for p in inventory.pages] == ["https://s.example/a"]
+    assert [(p.kind, p.detail) for p in inventory.problems] == [
+        ("url_not_http", ""),
+        ("url_not_http", "not a valid URL"),
+    ]
+
+
+@pytest.mark.unit
+def test_a_network_error_shows_only_its_type(
+    config: FetchConfig, dns: dict[str, list[str]]
+) -> None:
+    def broken(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/sitemap.xml":
+            raise httpx.ConnectError("resolver detail: 10.1.2.3 refused")
+        return httpx.Response(404, content=iter([b""]))
+
+    dns["s.example"] = [PUBLIC_IP]
+    with SafeFetcher(
+        config, transport=httpx.MockTransport(broken), limiter=NoWait()
+    ) as fetcher:
+        inventory = discover_pages(fetcher, SITE)
+    assert [(p.kind, p.detail) for p in inventory.problems] == [
+        ("sitemap_unreadable", "ConnectError")
+    ]

@@ -79,3 +79,18 @@ def test_entities_are_not_expanded(tmp_path: Path) -> None:
     parsed = parse_sitemap(xml.encode())
     assert all("TOP-SECRET" not in e.url for e in parsed.entries)
     assert all("expanded" not in e.url for e in parsed.entries)
+
+
+@pytest.mark.unit
+def test_more_than_50000_entries_is_not_valid() -> None:
+    from seo_advisor.features.inventory.sitemaps import (
+        SITEMAP_MAX_ENTRIES,
+        InvalidSitemapError,
+        parse_sitemap,
+    )
+
+    ns = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
+    one = "<url><loc>https://s.example/p</loc></url>"
+    body = f"<urlset {ns}>{one * (SITEMAP_MAX_ENTRIES + 1)}</urlset>".encode()
+    with pytest.raises(InvalidSitemapError, match="50000"):
+        parse_sitemap(body)

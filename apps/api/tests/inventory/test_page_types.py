@@ -36,3 +36,17 @@ MYPIPIT = [
 )
 def test_mypipit_page_types(url: str, page_type: str) -> None:
     assert page_type_of(url, MYPIPIT) == page_type
+
+
+@pytest.mark.unit
+def test_match_names_the_first_rule_that_matches() -> None:
+    from seo_advisor.features.inventory.page_types import match_page_type
+
+    found = match_page_type("https://m.example/blog/category/trekking/", MYPIPIT)
+    assert (found.path, found.page_type, found.rule_index) == (
+        "/blog/category/trekking",
+        "blog_category",
+        1,
+    )
+    none = match_page_type("https://m.example/about", MYPIPIT)
+    assert (none.page_type, none.rule_index) == ("other", None)

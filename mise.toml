@@ -16,58 +16,62 @@ _.file = ".env"
 # --- Setup -------------------------------------------------------------------
 
 [tasks.setup]
-description = "Install tools, Python deps and .env (steps 0.4, 0.6 add database and web)"
+description = "Install tools, Python and web deps, .env, database and seed sites"
 run = [
   "mise install",
   "test -f .env || cp .env.example .env",
   "uv sync --locked",
+  "pnpm install --frozen-lockfile",
+  "mise run db:seed",
 ]
 
 # --- Run ---------------------------------------------------------------------
 
 [tasks.dev]
-description = "Start the API and the web app"
+description = "Start the database, the API (:8000) and the web app (:5173)"
 depends = ["dev:api", "dev:web"]
 
 [tasks."dev:api"]
-description = "Start the API (step 0.5)"
-depends = ["db:up"]
-run = "uv run fastapi dev apps/api/src/seo_advisor/main.py"
+description = "Start the API with reload on code changes"
+depends = ["db:migrate"]
+run = "uv run uvicorn seo_advisor.main:app_from_env --factory --reload --reload-dir apps/api/src --host 127.0.0.1 --port 8000"
 
 [tasks."dev:web"]
-description = "Start the web app (step 0.6)"
+description = "Start the web app; it sends /api and /health to the API"
 run = "pnpm --filter web dev"
 
 # --- Quality -----------------------------------------------------------------
 
 [tasks.check]
 description = "Lint, type checks and tests"
-depends = ["lint", "typecheck", "test"]
+depends = ["lint", "typecheck", "test", "test:web"]
 
 [tasks.lint]
 description = "Lint, format and import-rule checks"
-# Step 0.6 adds "pnpm -r lint" when the web app exists.
 run = [
   "uv run ruff check --quiet",
   "uv run ruff format --check --quiet",
   "uv run lint-imports",
+  "pnpm --filter web lint",
 ]
 
 [tasks.typecheck]
 description = "Type checks (mypy --strict)"
-# Step 0.6 adds "pnpm -r typecheck" when the web app exists.
-run = "uv run mypy"
+run = ["uv run mypy", "pnpm -r typecheck"]
 
 [tasks.test]
 description = "Tests; add a path after -- for one feature"
 run = "uv run pytest -q"
 
+[tasks."test:web"]
+description = "Web app tests (Vitest)"
+run = "pnpm --filter web test"
+
 [tasks.audit]
 description = "Check dependencies for known vulnerabilities"
 # Audits the exact pins and hashes in uv.lock. Our own package is not on PyPI,
 # so --no-emit-project leaves it out of the list.
-# Step 0.6 adds "pnpm audit" when the web app exists.
-run = "uv export --locked --quiet --no-emit-project --format requirements-txt | uv run pip-audit --strict --disable-pip --require-hashes -r /dev/stdin"
+run = ["pnpm audit", "uv export --locked --quiet --all-groups --no-emit-project --format requirements-txt | uv run pip-audit --strict --disable-pip --require-hashes -r /dev/stdin"]
 
 # --- Database ----------------------------------------------------------------
 
@@ -85,9 +89,9 @@ depends = ["db:up"]
 run = "uv run alembic upgrade head"
 
 [tasks."db:seed"]
-description = "Add the 2 fake seed sites (step 0.4)"
+description = "Save the sites in infra/sites/*.toml (unchanged files change no rows)"
 depends = ["db:migrate"]
-run = "uv run python -m seo_advisor.seed"
+run = "uv run python -m seo_advisor.features.sites.cli infra/sites/*.toml"
 
 # --- Features ----------------------------------------------------------------
 
@@ -98,7 +102,7 @@ run = "uv run python -m seo_advisor.features.inventory.cli"
 # --- API client and evals ----------------------------------------------------
 
 [tasks.gen-client]
-description = "Export OpenAPI and make the TypeScript client again (step 0.5)"
+description = "Export OpenAPI and make the TypeScript client again"
 run = [
   "uv run python -m seo_advisor.openapi packages/api-client/openapi.json",
   "pnpm --filter api-client generate",
@@ -111,9 +115,11 @@ run = "uv run python -m evals"
 # --- Documents ---------------------------------------------------------------
 
 [tasks."docs:pdf"]
-description = "Build the requirements PDF again (needs the diagram build deps)"
+description = "Build the requirements PDF again (docs group + Google Chrome)"
 dir = "requirements/diagrams"
+# Docs-only packages: playwright (uv group "docs"), @hpcc-js/wasm-graphviz (root
+# package.json). render.py prints with the installed /usr/bin/google-chrome.
 run = [
-  "python build_requirements_pdf.py .",
-  "python render.py requirements.html ../seo-advisor-requirements.pdf",
+  "uv run --group docs python build_requirements_pdf.py .",
+  "uv run --group docs python render.py requirements.html ../seo-advisor-requirements.pdf",
 ]

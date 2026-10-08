@@ -1,0 +1,601 @@
+{
+  "components": {
+    "schemas": {
+      "DiscoveredPage": {
+        "additionalProperties": false,
+        "properties": {
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "lastmod": {
+            "title": "Lastmod",
+            "type": "string"
+          },
+          "page_type": {
+            "title": "Page Type",
+            "type": "string"
+          },
+          "sitemap": {
+            "title": "Sitemap",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "page_type",
+          "language",
+          "lastmod",
+          "sitemap"
+        ],
+        "title": "DiscoveredPage",
+        "type": "object"
+      },
+      "DiscoveryRun": {
+        "additionalProperties": false,
+        "description": "One live discovery: the inventory and every request it made.",
+        "properties": {
+          "duration_ms": {
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "inventory": {
+            "$ref": "#/components/schemas/Inventory"
+          },
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/FetchEvent"
+            },
+            "title": "Requests",
+            "type": "array"
+          },
+          "site_id": {
+            "format": "uuid",
+            "title": "Site Id",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site_id",
+          "started_at",
+          "duration_ms",
+          "inventory",
+          "requests"
+        ],
+        "title": "DiscoveryRun",
+        "type": "object"
+      },
+      "FetchEvent": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          },
+          "duration_ms": {
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "kind": {
+            "enum": [
+              "robots",
+              "page"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "ok",
+              "redirect",
+              "too_large",
+              "cached",
+              "disallowed",
+              "blocked",
+              "error"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "started_ms": {
+            "title": "Started Ms",
+            "type": "integer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "waited_ms": {
+            "title": "Waited Ms",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "url",
+          "outcome",
+          "status",
+          "bytes",
+          "started_ms",
+          "waited_ms",
+          "duration_ms"
+        ],
+        "title": "FetchEvent",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Inventory": {
+        "additionalProperties": false,
+        "properties": {
+          "base_url": {
+            "title": "Base Url",
+            "type": "string"
+          },
+          "pages": {
+            "items": {
+              "$ref": "#/components/schemas/DiscoveredPage"
+            },
+            "title": "Pages",
+            "type": "array"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/InventoryProblem"
+            },
+            "title": "Problems",
+            "type": "array"
+          },
+          "sitemaps_read": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sitemaps Read",
+            "type": "array"
+          }
+        },
+        "required": [
+          "base_url",
+          "sitemaps_read",
+          "pages",
+          "problems"
+        ],
+        "title": "Inventory",
+        "type": "object"
+      },
+      "InventoryProblem": {
+        "additionalProperties": false,
+        "properties": {
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "sitemap_blocked",
+              "sitemap_unreadable",
+              "sitemap_invalid",
+              "nested_sitemap_index",
+              "sitemap_on_other_host",
+              "url_on_other_host",
+              "url_not_http",
+              "duplicate_url"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "url"
+        ],
+        "title": "InventoryProblem",
+        "type": "object"
+      },
+      "PageTypeMatch": {
+        "additionalProperties": false,
+        "description": "Which rule gives a URL its page type. No match: \"other\", no rule.",
+        "properties": {
+          "page_type": {
+            "title": "Page Type",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pattern"
+          },
+          "rule_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Index"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "path",
+          "page_type"
+        ],
+        "title": "PageTypeMatch",
+        "type": "object"
+      },
+      "PageTypeRule": {
+        "additionalProperties": false,
+        "description": "A URL path pattern and its page type. \"*\" is exactly one whole path part.",
+        "properties": {
+          "page_type": {
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Page Type",
+            "type": "string"
+          },
+          "pattern": {
+            "title": "Pattern",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pattern",
+          "page_type"
+        ],
+        "title": "PageTypeRule",
+        "type": "object"
+      },
+      "SiteRecord": {
+        "additionalProperties": false,
+        "description": "A stored site.",
+        "properties": {
+          "base_url": {
+            "title": "Base Url",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "page_types": {
+            "items": {
+              "$ref": "#/components/schemas/PageTypeRule"
+            },
+            "title": "Page Types",
+            "type": "array"
+          },
+          "tenant_id": {
+            "format": "uuid",
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "tenant_name": {
+            "title": "Tenant Name",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "tenant_name",
+          "base_url",
+          "language",
+          "page_types",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SiteRecord",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "seo-advisor API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/sites": {
+      "get": {
+        "operationId": "list_sites",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SiteRecord"
+                  },
+                  "title": "Response List Sites",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Sites",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}": {
+      "get": {
+        "operationId": "get_site",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Site",
+        "tags": [
+          "sites"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/discoveries": {
+      "post": {
+        "description": "Read robots.txt and the sitemaps now (read-only, live) and list the pages.",
+        "operationId": "run_discovery",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscoveryRun"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Discovery",
+        "tags": [
+          "inventory"
+        ]
+      }
+    },
+    "/api/v1/sites/{site_id}/page-type": {
+      "get": {
+        "description": "Which page-type rule matches this URL. Nothing is fetched.",
+        "operationId": "find_page_type",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Site Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "title": "Url",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageTypeMatch"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Find Page Type",
+        "tags": [
+          "inventory"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Health",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  }
+}

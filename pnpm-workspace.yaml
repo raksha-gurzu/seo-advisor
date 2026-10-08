@@ -1,0 +1,11 @@
+# pnpm settings live here (pnpm 12). See PLAN.md, step 0.6.
+packages:
+  - apps/web
+  - packages/api-client
+
+# Use only releases that are 7 days old or more (minutes). Same rule as uv.
+minimumReleaseAge: 10080
+
+# Install scripts run only for the packages listed here (none now).
+# strictDepBuilds (default true) stops the install if a new package wants a script.
+allowBuilds: {}
